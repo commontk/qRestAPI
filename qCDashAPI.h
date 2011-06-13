@@ -26,8 +26,8 @@
 
 class qCDashAPIPrivate;
 
-template <class Key, class T> class QHash;
-typedef QHash<QString, QVariant> QVariantHash;
+template <class Key, class T> class QMap;
+typedef QMap<QString, QVariant> QVariantMap;
 
 class qCDashAPI : public QObject
 {
@@ -55,8 +55,8 @@ public:
   QString queryProjectList();
 
 signals:
-  void projectFilesReceived(const QString&, const QList<QVariantHash>&);
-  void projectListReceived(const QString&, const QList<QVariantHash>&);
+  void projectFilesReceived(const QString&, const QList<QVariantMap>&);
+  void projectListReceived(const QString&, const QList<QVariantMap>&);
 
 protected:
   QScopedPointer<qCDashAPIPrivate> d_ptr;

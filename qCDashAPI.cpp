@@ -80,7 +80,7 @@ void qCDashAPIPrivate::processProjectFiles(qCDashAPIPrivate * self, const QStrin
     {
     qDebug() << "processProjectFiles - queryUuid:" << queryUuid;
     }
-  QList<QVariantHash> result;
+  QList<QVariantMap> result;
   //bool status = scriptValue.property("status").toBool();
   //QString message = scriptValue.property("message").toString();
   QScriptValue files = scriptValue.property("files");
@@ -94,7 +94,7 @@ void qCDashAPIPrivate::processProjectFiles(qCDashAPIPrivate * self, const QStrin
     for(quint32 i = 0; i < length; ++i)
       {
       QScriptValue file = files.property(i);
-      result << file.toVariant().toHash();
+      result << file.toVariant().toMap();
       }
     }
   if(self->LogLevel == qCDashAPI::HIGH)
@@ -112,7 +112,7 @@ void qCDashAPIPrivate::processProjectList(qCDashAPIPrivate * self, const QString
     {
     qDebug() << "processProjectList - queryUuid:" << queryUuid;
     }
-  QList<QVariantHash> result;
+  QList<QVariantMap> result;
   if (scriptValue.isArray())
     {
     int length = scriptValue.property("length").toUInt32();
@@ -123,7 +123,7 @@ void qCDashAPIPrivate::processProjectList(qCDashAPIPrivate * self, const QString
     for(quint32 i = 0; i < length; ++i)
       {
       QScriptValue project = scriptValue.property(i);;
-      result << project.toVariant().toHash();
+      result << project.toVariant().toMap();
       }
     }
   if(self->LogLevel == qCDashAPI::HIGH)
