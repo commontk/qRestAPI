@@ -22,6 +22,7 @@
 #include <QDebug>
 #include <QScriptValueIterator>
 #include <QStringList>
+#include <QUuid>
 
 // qCDashAPI includes
 #include "qCDashAPI.h"
@@ -56,18 +57,29 @@ QUrl qCDashAPIPrivate::url(const QString& method, const QString& task)
 }
 
 // --------------------------------------------------------------------------
-void qCDashAPIPrivate::query(const QUrl& url, ProcessingMethod processingMethod)
+QString qCDashAPIPrivate::query(const QUrl& url, ProcessingMethod processingMethod)
 {
   QNetworkRequest request;
   request.setUrl(url);
   QNetworkReply * reply = this->NetworkManager.get(request);
   this->NetworkReplyToProcessingMethodMap.insert(reply, processingMethod);
+  QString queryUuid = QUuid::createUuid();
+  this->NetworkReplyToQueryUuidMap.insert(reply, queryUuid);
+  if(this->LogLevel == qCDashAPI::LOW)
+    {
+    qDebug() << "url" << url << ", queryUuid:" << queryUuid;
+    }
+  return queryUuid;
 }
 
 // --------------------------------------------------------------------------
-void qCDashAPIPrivate::processProjectFiles(qCDashAPIPrivate * self, const QScriptValue& scriptValue)
+void qCDashAPIPrivate::processProjectFiles(qCDashAPIPrivate * self, const QString& queryUuid, const QScriptValue& scriptValue)
 {
   Q_ASSERT(self);
+  if(self->LogLevel == qCDashAPI::LOW)
+    {
+    qDebug() << "processProjectFiles - queryUuid:" << queryUuid;
+    }
   QList<QVariantHash> result;
   //bool status = scriptValue.property("status").toBool();
   //QString message = scriptValue.property("message").toString();
@@ -89,13 +101,17 @@ void qCDashAPIPrivate::processProjectFiles(qCDashAPIPrivate * self, const QScrip
     {
     qDebug() << "projectFiles" << result;
     }
-  emit self->q_func()->projectFilesReceived(result);
+  emit self->q_func()->projectFilesReceived(queryUuid, result);
 }
 
 // --------------------------------------------------------------------------
-void qCDashAPIPrivate::processProjectList(qCDashAPIPrivate * self, const QScriptValue& scriptValue)
+void qCDashAPIPrivate::processProjectList(qCDashAPIPrivate * self, const QString& queryUuid, const QScriptValue& scriptValue)
 {
   Q_ASSERT(self);
+  if(self->LogLevel == qCDashAPI::LOW)
+    {
+    qDebug() << "processProjectList - queryUuid:" << queryUuid;
+    }
   QList<QVariantHash> result;
   if (scriptValue.isArray())
     {
@@ -114,7 +130,7 @@ void qCDashAPIPrivate::processProjectList(qCDashAPIPrivate * self, const QScript
     {
     qDebug() << "projectList" << result;
     }
-  emit self->q_func()->projectListReceived(result);
+  emit self->q_func()->projectListReceived(queryUuid, result);
 }
 
 // --------------------------------------------------------------------------
@@ -130,8 +146,9 @@ void qCDashAPIPrivate::replyFinished(QNetworkReply* reply)
     }
   QScriptValue sc = this->ScriptEngine.evaluate("(" + QString(reply->readAll()) + ")");
   ProcessingMethod processingMethod = this->NetworkReplyToProcessingMethodMap.take(reply);
+  QString queryUuid = this->NetworkReplyToQueryUuidMap.take(reply);
   Q_ASSERT(processingMethod);
-  (*processingMethod)(this, sc);
+  (*processingMethod)(this, queryUuid, sc);
   reply->deleteLater();
 }
 
@@ -180,7 +197,7 @@ void qCDashAPI::setLogLevel(qCDashAPI::LogLevel level)
 }
 
 // --------------------------------------------------------------------------
-void qCDashAPI::queryProjectFiles(const QString& project, const QString& match)
+QString qCDashAPI::queryProjectFiles(const QString& project, const QString& match)
 {
   Q_D(qCDashAPI);
 
@@ -190,13 +207,13 @@ void qCDashAPI::queryProjectFiles(const QString& project, const QString& match)
     {
     url.addQueryItem("match", match);
     }
-  d->query(url, &qCDashAPIPrivate::processProjectFiles);
+  return d->query(url, &qCDashAPIPrivate::processProjectFiles);
 }
 
 // --------------------------------------------------------------------------
-void qCDashAPI::queryProjectList()
+QString qCDashAPI::queryProjectList()
 {
   Q_D(qCDashAPI);
   QUrl url = d->url("project", "list");
-  d->query(url, &qCDashAPIPrivate::processProjectList);
+  return d->query(url, &qCDashAPIPrivate::processProjectList);
 }

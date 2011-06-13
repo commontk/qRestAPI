@@ -43,14 +43,14 @@ public:
 
   virtual void init();
 
-  typedef void(*ProcessingMethod)(qCDashAPIPrivate *, const QScriptValue&);
+  typedef void(*ProcessingMethod)(qCDashAPIPrivate *, const QString&, const QScriptValue&);
 
   QUrl url(const QString& method, const QString& task);
-  void query(const QUrl& url, ProcessingMethod processingMethod);
+  QString query(const QUrl& url, ProcessingMethod processingMethod);
 
-  static void processProjectFiles(qCDashAPIPrivate * self, const QScriptValue& scriptValue);
+  static void processProjectFiles(qCDashAPIPrivate * self, const QString& queryUuid, const QScriptValue& scriptValue);
 
-  static void processProjectList(qCDashAPIPrivate * self, const QScriptValue& scriptValue);
+  static void processProjectList(qCDashAPIPrivate * self, const QString& queryUuid, const QScriptValue& scriptValue);
 
 public slots:
   void replyFinished(QNetworkReply*);
@@ -61,6 +61,7 @@ public:
   QNetworkAccessManager NetworkManager;
   QScriptEngine ScriptEngine;
   QHash<QNetworkReply*, ProcessingMethod> NetworkReplyToProcessingMethodMap;
+  QHash<QNetworkReply*, QString> NetworkReplyToQueryUuidMap;
 };
 
 #endif

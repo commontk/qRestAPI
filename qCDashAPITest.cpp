@@ -22,12 +22,14 @@
 #include <QCoreApplication>
 #include <QStringList>
 #include <QTimer>
+#include <QUuid>
 
 // qCDashAPI includes
 #include "qCDashAPI.h"
 
 // STD includes
 #include <cstdlib>
+#include <iostream>
 
 int qCDashAPITest(int argc, char* argv[])
 {
@@ -43,13 +45,21 @@ int qCDashAPITest(int argc, char* argv[])
   cdashAPI.setLogLevel(qCDashAPI::LOW);
   cdashAPI.setUrl("http://www.cdash.org/slicer4");
 
+  QString queryUuid;
   if (query.isEmpty() || query == "ProjectFiles")
     {
-    cdashAPI.queryProjectFiles("Slicer4");
+    queryUuid = cdashAPI.queryProjectFiles("Slicer4");
     }
   if (query.isEmpty() || query == "ProjectList")
     {
-    cdashAPI.queryProjectList();
+    queryUuid = cdashAPI.queryProjectList();
+    }
+
+  if (QUuid(queryUuid).isNull())
+    {
+    std::cerr << "Line " << __LINE__
+              << " - Problem with query() - Return Uuid is  not valid." << std::endl;
+    return EXIT_FAILURE;
     }
 
   QTimer::singleShot(1000, qApp, SLOT(quit()));

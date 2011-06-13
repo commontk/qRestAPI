@@ -51,12 +51,12 @@ public:
   LogLevel logLevel()const;
   void setLogLevel(LogLevel level);
 
-  void queryProjectFiles(const QString& project, const QString& match = QString());
-  void queryProjectList();
+  QString queryProjectFiles(const QString& project, const QString& match = QString());
+  QString queryProjectList();
 
 signals:
-  void projectFilesReceived(const QList<QVariantHash>&);
-  void projectListReceived(const QList<QVariantHash>&);
+  void projectFilesReceived(const QString&, const QList<QVariantHash>&);
+  void projectListReceived(const QString&, const QList<QVariantHash>&);
 
 protected:
   QScopedPointer<qCDashAPIPrivate> d_ptr;
