@@ -23,6 +23,12 @@ QT4_WRAP_CPP(KIT_MOC_OUTPUT ${KIT_MOC_SRCS})
 ADD_LIBRARY(qCDashAPI ${KIT_SRCS} ${KIT_MOC_OUTPUT})
 TARGET_LINK_LIBRARIES(qCDashAPI ${QT_LIBRARIES})
 
+# To fix compilation problem: relocation R_X86_64_32 against `a local symbol' can not be
+# used when making a shared object; recompile with -fPIC
+IF(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+  SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-fPIC")
+ENDIF()
+
 IF(BUILD_TESTING)
   INCLUDE(CTest)
   CREATE_TEST_SOURCELIST(Tests qCDashAPICppTests.cpp
