@@ -4,7 +4,7 @@ qCDashAPI is a cross-platform [Qt-based](http://doc.qt.nokia.com/4.7/qt4-7-intro
 
 ## Prerequisites
 
- * [Qt 4.7](http://qt.nokia.com/downloads)
+ * [Qt 4.6.2](http://qt.nokia.com/downloads)
  * [CMake 2.8.2](http://www.cmake.org)
 
 ## How to build
