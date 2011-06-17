@@ -65,7 +65,7 @@ QString qCDashAPIPrivate::query(const QUrl& url, ProcessingMethod processingMeth
   this->NetworkReplyToProcessingMethodMap.insert(reply, processingMethod);
   QString queryUuid = QUuid::createUuid();
   this->NetworkReplyToQueryUuidMap.insert(reply, queryUuid);
-  if(this->LogLevel == qCDashAPI::LOW)
+  if(this->LogLevel >= qCDashAPI::LOW)
     {
     qDebug() << "url" << url << ", queryUuid:" << queryUuid;
     }
@@ -76,7 +76,7 @@ QString qCDashAPIPrivate::query(const QUrl& url, ProcessingMethod processingMeth
 void qCDashAPIPrivate::processProjectFiles(qCDashAPIPrivate * self, const QString& queryUuid, const QScriptValue& scriptValue)
 {
   Q_ASSERT(self);
-  if(self->LogLevel == qCDashAPI::LOW)
+  if(self->LogLevel >= qCDashAPI::LOW)
     {
     qDebug() << "processProjectFiles - queryUuid:" << queryUuid;
     }
@@ -87,7 +87,7 @@ void qCDashAPIPrivate::processProjectFiles(qCDashAPIPrivate * self, const QStrin
   if (files.isArray())
     {
     int length = files.property("length").toUInt32();
-    if(self->LogLevel == qCDashAPI::LOW)
+    if(self->LogLevel >= qCDashAPI::LOW)
       {
       qDebug() << "projectFiles length" << length;
       }
@@ -97,7 +97,7 @@ void qCDashAPIPrivate::processProjectFiles(qCDashAPIPrivate * self, const QStrin
       result << file.toVariant().toMap();
       }
     }
-  if(self->LogLevel == qCDashAPI::HIGH)
+  if(self->LogLevel >= qCDashAPI::HIGH)
     {
     qDebug() << "projectFiles" << result;
     }
@@ -108,7 +108,7 @@ void qCDashAPIPrivate::processProjectFiles(qCDashAPIPrivate * self, const QStrin
 void qCDashAPIPrivate::processProjectList(qCDashAPIPrivate * self, const QString& queryUuid, const QScriptValue& scriptValue)
 {
   Q_ASSERT(self);
-  if(self->LogLevel == qCDashAPI::LOW)
+  if(self->LogLevel >= qCDashAPI::LOW)
     {
     qDebug() << "processProjectList - queryUuid:" << queryUuid;
     }
@@ -116,7 +116,7 @@ void qCDashAPIPrivate::processProjectList(qCDashAPIPrivate * self, const QString
   if (scriptValue.isArray())
     {
     int length = scriptValue.property("length").toUInt32();
-    if(self->LogLevel == qCDashAPI::LOW)
+    if(self->LogLevel >= qCDashAPI::LOW)
       {
       qDebug() << "projectList length" << length;
       }
@@ -126,7 +126,7 @@ void qCDashAPIPrivate::processProjectList(qCDashAPIPrivate * self, const QString
       result << project.toVariant().toMap();
       }
     }
-  if(self->LogLevel == qCDashAPI::HIGH)
+  if(self->LogLevel >= qCDashAPI::HIGH)
     {
     qDebug() << "projectList" << result;
     }
@@ -137,7 +137,7 @@ void qCDashAPIPrivate::processProjectList(qCDashAPIPrivate * self, const QString
 void qCDashAPIPrivate::replyFinished(QNetworkReply* reply)
 {
   Q_Q(qCDashAPI);
-  if(this->LogLevel == qCDashAPI::LOW)
+  if(this->LogLevel >= qCDashAPI::LOW)
     {
     if (reply->error() != QNetworkReply::NoError)
       {
