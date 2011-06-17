@@ -29,6 +29,29 @@
 #include "qCDashAPI_p.h"
 
 // --------------------------------------------------------------------------
+namespace
+{
+
+// --------------------------------------------------------------------------
+QVariantMap scriptValueToMap(const QScriptValue& value)
+{
+#if QT_VERSION >= 0x040700
+  return value.toVariant().toMap();
+#else
+  QVariantMap result;
+  QScriptValueIterator it(value);
+  while (it.hasNext())
+    {
+    it.next();
+    result.insert(it.name(), it.value().toVariant());
+    }
+  return result;
+#endif
+}
+
+} // end of anonymous namespace
+
+// --------------------------------------------------------------------------
 // qCDashAPIPrivate methods
 
 // --------------------------------------------------------------------------
@@ -94,7 +117,7 @@ void qCDashAPIPrivate::processProjectFiles(qCDashAPIPrivate * self, const QStrin
     for(quint32 i = 0; i < length; ++i)
       {
       QScriptValue file = files.property(i);
-      result << file.toVariant().toMap();
+      result << scriptValueToMap(file);
       }
     }
   if(self->LogLevel >= qCDashAPI::HIGH)
@@ -123,7 +146,8 @@ void qCDashAPIPrivate::processProjectList(qCDashAPIPrivate * self, const QString
     for(quint32 i = 0; i < length; ++i)
       {
       QScriptValue project = scriptValue.property(i);;
-      result << project.toVariant().toMap();
+      qDebug() << "project typename" << project.toVariant().typeName();
+      result << scriptValueToMap(project);
       }
     }
   if(self->LogLevel >= qCDashAPI::HIGH)
