@@ -67,7 +67,7 @@ QString qCDashAPIPrivate::query(const QUrl& url, ProcessingMethod processingMeth
   this->NetworkReplyToQueryUuidMap.insert(reply, queryUuid);
   if(this->LogLevel >= qCDashAPI::LOW)
     {
-    qDebug() << "url" << url << ", queryUuid:" << queryUuid;
+    qDebug() << "[REQUEST] url" << url << ", queryUuid:" << queryUuid;
     }
   return queryUuid;
 }
@@ -78,7 +78,7 @@ void qCDashAPIPrivate::processProjectFiles(qCDashAPIPrivate * self, const QStrin
   Q_ASSERT(self);
   if(self->LogLevel >= qCDashAPI::LOW)
     {
-    qDebug() << "processProjectFiles - queryUuid:" << queryUuid;
+    qDebug() << "[REPLY] processProjectFiles - queryUuid:" << queryUuid;
     }
   QList<QVariantMap> result;
   //bool status = scriptValue.property("status").toBool();
@@ -110,7 +110,7 @@ void qCDashAPIPrivate::processProjectList(qCDashAPIPrivate * self, const QString
   Q_ASSERT(self);
   if(self->LogLevel >= qCDashAPI::LOW)
     {
-    qDebug() << "processProjectList - queryUuid:" << queryUuid;
+    qDebug() << "[REPLY] processProjectList - queryUuid:" << queryUuid;
     }
   QList<QVariantMap> result;
   if (scriptValue.isArray())
