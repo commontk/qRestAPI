@@ -49,7 +49,7 @@ IF(BUILD_TESTING)
 
   QUERY_TEST(ProjectList)
   SET_PROPERTY(TEST qCDashAPITest_ProjectList
-    PROPERTY PASS_REGULAR_EXPRESSION "projectList length.*QVariant(QString, "Slicer4")")
+    PROPERTY PASS_REGULAR_EXPRESSION "\"name\".*QVariant.*QString.*Slicer4")
 
 ENDIF()
 
