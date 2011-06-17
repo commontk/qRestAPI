@@ -48,7 +48,8 @@ IF(BUILD_TESTING)
   SET_PROPERTY(TEST qCDashAPITest_ProjectFiles PROPERTY PASS_REGULAR_EXPRESSION "projectFiles length")
 
   QUERY_TEST(ProjectList)
-  SET_PROPERTY(TEST qCDashAPITest_ProjectList PROPERTY PASS_REGULAR_EXPRESSION "projectList length")
+  SET_PROPERTY(TEST qCDashAPITest_ProjectList
+    PROPERTY PASS_REGULAR_EXPRESSION "projectList length.*QVariant(QString, "Slicer4")")
 
 ENDIF()
 

@@ -42,16 +42,17 @@ int qCDashAPITest(int argc, char* argv[])
     }
 
   qCDashAPI cdashAPI;
-  cdashAPI.setLogLevel(qCDashAPI::LOW);
   cdashAPI.setUrl("http://www.cdash.org/slicer4");
 
   QString queryUuid;
   if (query.isEmpty() || query == "ProjectFiles")
     {
+    cdashAPI.setLogLevel(qCDashAPI::LOW);
     queryUuid = cdashAPI.queryProjectFiles("Slicer4");
     }
   if (query.isEmpty() || query == "ProjectList")
     {
+    cdashAPI.setLogLevel(qCDashAPI::HIGH);
     queryUuid = cdashAPI.queryProjectList();
     }
 
