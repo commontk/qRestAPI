@@ -109,7 +109,7 @@ void qCDashAPIPrivate::processProjectFiles(qCDashAPIPrivate * self, const QStrin
   QScriptValue files = scriptValue.property("files");
   if (files.isArray())
     {
-    int length = files.property("length").toUInt32();
+    quint32 length = files.property("length").toUInt32();
     if(self->LogLevel >= qCDashAPI::LOW)
       {
       qDebug() << "projectFiles length" << length;
@@ -138,7 +138,7 @@ void qCDashAPIPrivate::processProjectList(qCDashAPIPrivate * self, const QString
   QList<QVariantMap> result;
   if (scriptValue.isArray())
     {
-    int length = scriptValue.property("length").toUInt32();
+    quint32 length = scriptValue.property("length").toUInt32();
     if(self->LogLevel >= qCDashAPI::LOW)
       {
       qDebug() << "projectList length" << length;
