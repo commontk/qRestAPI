@@ -4,7 +4,8 @@ PROJECT(qCDashAPI)
 
 OPTION(BUILD_TESTING "Test the project" ON)
 
-FIND_PACKAGE(Qt4 4.6.2 COMPONENTS QtCore QtGui QtNetwork QtScript REQUIRED)
+# HACK: QtXml is required because of "http://www.richelbilderbeek.nl/CppLinkErrorUndefinedReferenceToQListData.htm"
+FIND_PACKAGE(Qt4 4.6.2 COMPONENTS QtCore QtGui QtNetwork QtScript QtXml REQUIRED)
 INCLUDE(${QT_USE_FILE})
 
 SET(KIT_SRCS
