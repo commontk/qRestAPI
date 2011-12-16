@@ -1,6 +1,6 @@
 /*==============================================================================
 
-  Program: 3D Slicer
+  Program: qMidasAPI
 
   Copyright (c) 2010 Kitware Inc.
 
@@ -18,8 +18,8 @@
 
 ==============================================================================*/
 
-#ifndef __qCDashAPI_p_h
-#define __qCDashAPI_p_h
+#ifndef __qMidasAPI_p_h
+#define __qMidasAPI_p_h
 
 // Qt includes
 #include <QHash>
@@ -27,41 +27,51 @@
 #include <QNetworkReply>
 #include <QScriptEngine>
 
-// qCDashAPI includes
-#include "qCDashAPI.h"
+// qMidasAPI includes
+#include "qMidasAPI.h"
 
 // --------------------------------------------------------------------------
-class qCDashAPIPrivate : public QObject
+class qMidasAPIPrivate : public QObject
 {
-  Q_DECLARE_PUBLIC(qCDashAPI);
+  Q_DECLARE_PUBLIC(qMidasAPI);
   Q_OBJECT
 protected:
-  qCDashAPI* const q_ptr;
+  qMidasAPI* const q_ptr;
 public:
-  typedef qCDashAPIPrivate Self;
-  qCDashAPIPrivate(qCDashAPI& object);
+  typedef qMidasAPIPrivate Self;
+  qMidasAPIPrivate(qMidasAPI& object);
 
   virtual void init();
 
-  typedef void(*ProcessingMethod)(qCDashAPIPrivate *, const QString&, const QScriptValue&);
+  QUrl createUrl(const QString& method, const qMidasAPI::ParametersType& parameters);
+  QUuid postQuery(const QUrl& queryUrl);
 
-  QUrl url(const QString& method, const QString& task);
-  QString query(const QUrl& url, ProcessingMethod processingMethod);
-
-  static void processProjectFiles(qCDashAPIPrivate * self, const QString& queryUuid, const QScriptValue& scriptValue);
-
-  static void processProjectList(qCDashAPIPrivate * self, const QString& queryUuid, const QScriptValue& scriptValue);
+  QList<QVariantMap> parseResult(const QScriptValue& scriptValue);
+  QString qVariantMapToString(const QList<QVariantMap>& result)const;
 
 public slots:
-  void replyFinished(QNetworkReply*);
+  void processReply(QNetworkReply* reply);
+  void print(const QString& msg);
 
 public:
-  QString Url;
-  qCDashAPI::LogLevel LogLevel;
-  QNetworkAccessManager NetworkManager;
+  QString MidasUrl;
+  QString ResponseType;
+
+  QNetworkAccessManager* NetworkManager;
   QScriptEngine ScriptEngine;
-  QHash<QNetworkReply*, ProcessingMethod> NetworkReplyToProcessingMethodMap;
-  QHash<QNetworkReply*, QString> NetworkReplyToQueryUuidMap;
+};
+
+// --------------------------------------------------------------------------
+class qMidasAPIResult : public QObject
+{
+  Q_OBJECT
+public:
+  QUuid QueryUuid;
+  QList<QVariantMap> Result;
+  QString Error;
+public slots:
+  void setResult(QUuid queryUuid, const QList<QVariantMap>& result);
+  void setError(const QString& error);
 };
 
 #endif

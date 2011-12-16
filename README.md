@@ -1,6 +1,6 @@
 # OVERVIEW
 
-qCDashAPI is a cross-platform [Qt-based](http://doc.qt.nokia.com/4.7/qt4-7-intro.html) library allowing to easily query a [CDash](http://www.cdash.org) server.
+qMIDASAPI is a cross-platform [Qt-based](http://doc.qt.nokia.com/4.7/qt4-7-intro.html) library allowing to easily query a [Midas](http://midas.kitware.com) server.
 
 ## Prerequisites
 
@@ -9,10 +9,10 @@ qCDashAPI is a cross-platform [Qt-based](http://doc.qt.nokia.com/4.7/qt4-7-intro
 
 ## How to build
 
-    git clone git://github.com/jcfr/qCDashAPI.git
-    mkdir qCDashAPI-build
-    cd qCDashAPI-build
-    cmake -DQT_QMAKE_EXECUTABLE:FILEPATH=/path/to/cmake ../qCDashAPI
+    git clone git://github.com/Slicer/qMidasAPI.git
+    mkdir qMidasAPI-build
+    cd qMidasAPI-build
+    cmake -DQT_QMAKE_EXECUTABLE:FILEPATH=/path/to/cmake ../qMidasAPI
     make -j4
     ctest
 
