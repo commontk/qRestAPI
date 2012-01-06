@@ -26,6 +26,9 @@
 #include <QObject>
 #include <QUuid>
 
+template <class Key, class T> class QMap;
+typedef QMap<QString, QVariant> QVariantMap;
+
 class qMidasAPIPrivate;
 
 /// qMidasAPI is a simple interface class to communicate with a Midas3 public
