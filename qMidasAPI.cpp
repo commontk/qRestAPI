@@ -120,6 +120,19 @@ QUuid qMidasAPIPrivate::postQuery(const QUrl& url)
   return queryUuid;
 }
 
+namespace
+{
+// --------------------------------------------------------------------------
+void appendScriptValueToVariantMapList(QList<QVariantMap>& result, const QScriptValue& data)
+{
+  QVariantMap map = scriptValueToMap(data);
+  if (!map.isEmpty())
+    {
+    result << scriptValueToMap(data);
+    }
+}
+}
+
 // --------------------------------------------------------------------------
 QList<QVariantMap> qMidasAPIPrivate::parseResult(const QScriptValue& scriptValue)
 {
@@ -147,11 +160,19 @@ QList<QVariantMap> qMidasAPIPrivate::parseResult(const QScriptValue& scriptValue
       q->emit errorReceived( QString("Bad data: ") + data.toString());
       }
     }
-  QVariantMap map = scriptValueToMap(data);
-  if (!map.isEmpty())
+  if (data.isArray())
     {
-    result << scriptValueToMap(data);
+    quint32 length = data.property("length").toUInt32();
+    for(quint32 i = 0; i < length; ++i)
+      {
+      appendScriptValueToVariantMapList(result, data.property(i));
+      }
     }
+  else
+    {
+    appendScriptValueToVariantMapList(result, data);
+    }
+  
   return result;
 }
 

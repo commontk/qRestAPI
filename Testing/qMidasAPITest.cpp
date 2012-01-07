@@ -153,6 +153,18 @@ int qMidasAPITest(int argc, char* argv[])
               << std::endl;
     return EXIT_FAILURE;
     }
+    
+  // --------------------------------------------------------------------------
+  // Synchronous query: midas.community.list (return array of data)
+  // --------------------------------------------------------------------------
+  result= qMidasAPI::synchronousQuery(ok, midasUrl,"midas.community.list");
+  std::cout << "result: " <<
+    qPrintable(qMidasAPI::qVariantMapListToString(result))<< std::endl;
+  if (!ok || result.size() == 0)
+    {
+    std::cout << "Failed to query 'midas.community.list'." << std::endl;
+    return EXIT_FAILURE;
+    }
 
   return EXIT_SUCCESS;
 }
