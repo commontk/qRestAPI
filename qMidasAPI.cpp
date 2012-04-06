@@ -113,7 +113,6 @@ QUuid qMidasAPIPrivate::postQuery(const QUrl& url)
   QNetworkRequest queryRequest;
   queryRequest.setUrl(url);
   QUuid queryUuid = QUuid::createUuid();
-  qDebug() << "query: " << url.toString();
   q->emit infoReceived("Post query: " + url.toString());
   QNetworkReply * queryReply = this->NetworkManager->get(queryRequest);
   queryReply->setProperty("uuid", queryUuid.toString());
