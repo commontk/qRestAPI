@@ -21,9 +21,12 @@
 // Qt includes
 #include <QCoreApplication>
 #include <QDebug>
+#include <QDir>
 #include <QSignalSpy>
 #include <QStringList>
+#include <QTime>
 #include <QTimer>
+#include <QUrl>
 #include <QUuid>
 
 // qCDashAPI includes
@@ -45,13 +48,55 @@ void wait(int msec)
 int qMidasAPITest(int argc, char* argv[])
 {
   QCoreApplication app(argc, argv);
-
-  QString query;
-  if (app.arguments().count() > 1)
+  
+  bool ok = false;
+	QList<QVariantMap> result;
+    
+  // --------------------------------------------------------------------------
+  // Check that query associated with local file release file handle
+  // --------------------------------------------------------------------------
+  QDir tmp = QDir::temp();
+  QString temporaryDirName =
+        QString("qMidasAPITest1-queryFile.%1").arg(QTime::currentTime().toString("hhmmsszzz"));
+  tmp.mkdir(temporaryDirName);
+  tmp.cd(temporaryDirName);
+  tmp.mkdir("api");
+  tmp.cd("api");
+    
+	QFile fileReply(tmp.filePath("json"));
+	if (!fileReply.open(QFile::WriteOnly))
+	  {
+	  std::cerr << "Line " << __LINE__ << " - Failed to create temporary file." 
+	            << qPrintable(tmp.filePath("json")) << std::endl;
+    return EXIT_FAILURE;
+	  }
+	  
+	fileReply.write(
+	  QString("{\"stat\":\"ok\",\"code\":\"0\",\"message\":\"\",\"data\":{"
+	          "\"quote\":\"If a day goes past and you do not learn anything, it is a waste of a day.\","
+	          "\"author\" : \"Mike Horn\"}}").toLatin1());
+	          
+	fileReply.close();
+	
+	ok = false;
+  result = qMidasAPI::synchronousQuery(ok, 
+	  QUrl::fromLocalFile(QDir::temp().filePath(temporaryDirName)).toString(), "midas.quote.of.the.day");
+  std::cout << "result: " <<
+    qPrintable(qMidasAPI::qVariantMapListToString(result)) << std::endl;
+  if (!ok || result.size() == 0)
     {
-    query = app.arguments().at(1);
+    std::cout << "Failed to query 'midas.quote.of.the.day'." << std::endl;
+    return EXIT_FAILURE;
+    }
+  
+  // Attempt to delete 'queryFile'
+  if (!QFile::remove(tmp.filePath("json")))
+    {
+    std::cout << "Failed to remove queryFile. [" << qPrintable(tmp.filePath("json")) << "]" << std::endl;
+    return EXIT_FAILURE;
     }
 
+  // --------------------------------------------------------------------------
   QString midasUrl("http://slicer.kitware.com/midas3");
   qMidasAPI midasAPI;
   midasAPI.setMidasUrl(midasUrl);
@@ -106,9 +151,8 @@ int qMidasAPITest(int argc, char* argv[])
   // --------------------------------------------------------------------------
   // Synchronous query: midas.info
   // --------------------------------------------------------------------------
-  bool ok = false;
-  QList<QVariantMap> result  =
-    qMidasAPI::synchronousQuery(ok, midasUrl, "midas.info");
+  ok = false;
+  result  = qMidasAPI::synchronousQuery(ok, midasUrl, "midas.info");
   std::cout << "result: " <<
     qPrintable(qMidasAPI::qVariantMapListToString(result))<< std::endl;
   if (!ok || result.size() == 0)
@@ -165,6 +209,8 @@ int qMidasAPITest(int argc, char* argv[])
     std::cout << "Failed to query 'midas.community.list'." << std::endl;
     return EXIT_FAILURE;
     }
-
+    
+  
+	
   return EXIT_SUCCESS;
 }

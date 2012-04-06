@@ -194,6 +194,7 @@ void qMidasAPIPrivate::processReply(QNetworkReply* reply)
   q->emit infoReceived(QString("Results for ") + uuid.toString()
                        + ": " + q->qVariantMapListToString(result));
   q->emit resultReceived(uuid, result);
+  reply->close();
   reply->deleteLater();
 }
 
