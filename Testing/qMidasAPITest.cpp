@@ -48,10 +48,10 @@ void wait(int msec)
 int qMidasAPITest(int argc, char* argv[])
 {
   QCoreApplication app(argc, argv);
-  
+
   bool ok = false;
-	QList<QVariantMap> result;
-    
+  QList<QVariantMap> result;
+
   // --------------------------------------------------------------------------
   // Check that query associated with local file release file handle
   // --------------------------------------------------------------------------
@@ -62,25 +62,25 @@ int qMidasAPITest(int argc, char* argv[])
   tmp.cd(temporaryDirName);
   tmp.mkdir("api");
   tmp.cd("api");
-    
-	QFile fileReply(tmp.filePath("json"));
-	if (!fileReply.open(QFile::WriteOnly))
-	  {
-	  std::cerr << "Line " << __LINE__ << " - Failed to create temporary file." 
-	            << qPrintable(tmp.filePath("json")) << std::endl;
+
+  QFile fileReply(tmp.filePath("json"));
+  if (!fileReply.open(QFile::WriteOnly))
+    {
+    std::cerr << "Line " << __LINE__ << " - Failed to create temporary file." 
+              << qPrintable(tmp.filePath("json")) << std::endl;
     return EXIT_FAILURE;
-	  }
-	  
-	fileReply.write(
-	  QString("{\"stat\":\"ok\",\"code\":\"0\",\"message\":\"\",\"data\":{"
-	          "\"quote\":\"If a day goes past and you do not learn anything, it is a waste of a day.\","
-	          "\"author\" : \"Mike Horn\"}}").toLatin1());
-	          
-	fileReply.close();
-	
-	ok = false;
-  result = qMidasAPI::synchronousQuery(ok, 
-	  QUrl::fromLocalFile(QDir::temp().filePath(temporaryDirName)).toString(), "midas.quote.of.the.day");
+    }
+
+  fileReply.write(
+    QString("{\"stat\":\"ok\",\"code\":\"0\",\"message\":\"\",\"data\":{"
+            "\"quote\":\"If a day goes past and you do not learn anything, it is a waste of a day.\","
+            "\"author\" : \"Mike Horn\"}}").toLatin1());
+            
+  fileReply.close();
+
+  ok = false;
+  result = qMidasAPI::synchronousQuery(ok,
+    QUrl::fromLocalFile(QDir::temp().filePath(temporaryDirName)).toString(), "midas.quote.of.the.day");
   std::cout << "result: " <<
     qPrintable(qMidasAPI::qVariantMapListToString(result)) << std::endl;
   if (!ok || result.size() == 0)
@@ -88,7 +88,7 @@ int qMidasAPITest(int argc, char* argv[])
     std::cout << "Failed to query 'midas.quote.of.the.day'." << std::endl;
     return EXIT_FAILURE;
     }
-  
+
   // Attempt to delete 'queryFile'
   if (!QFile::remove(tmp.filePath("json")))
     {
@@ -168,7 +168,7 @@ int qMidasAPITest(int argc, char* argv[])
   result= qMidasAPI::synchronousQuery(ok, midasUrl,"midas.notafunction");
   std::cout << "result: " <<
     qPrintable(qMidasAPI::qVariantMapListToString(result))<< std::endl;
-  if (ok || 
+  if (ok ||
       result.size() != 1 ||
       result.at(0)["queryError"].isNull())
     {
@@ -188,7 +188,7 @@ int qMidasAPITest(int argc, char* argv[])
   result= qMidasAPI::synchronousQuery(ok, midasUrl,"midas.login", wrongParameters);
   std::cout << "result: " <<
     qPrintable(qMidasAPI::qVariantMapListToString(result))<< std::endl;
-  if (ok || 
+  if (ok ||
       result.size() != 1 ||
       result.at(0)["queryError"].isNull())
     {
@@ -209,8 +209,6 @@ int qMidasAPITest(int argc, char* argv[])
     std::cout << "Failed to query 'midas.community.list'." << std::endl;
     return EXIT_FAILURE;
     }
-    
-  
-	
+
   return EXIT_SUCCESS;
 }
