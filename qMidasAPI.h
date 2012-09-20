@@ -49,6 +49,9 @@ class qMidasAPI : public QObject
   Q_OBJECT
   /// Url of the Midas server. e.g. "http://slicer.kitware.com/midas3"
   Q_PROPERTY(QString midasUrl READ midasUrl WRITE setMidasUrl)
+
+  /// Max time to wait until last progress of a query
+  Q_PROPERTY(int timeOut READ timeOut WRITE setTimeOut)
 public:
   typedef QObject Superclass;
   explicit qMidasAPI(QObject*parent = 0);
@@ -83,6 +86,8 @@ public:
   /// Mostly for debug purpose.
   static QString qVariantMapListToString(const QList<QVariantMap>& variants);
 
+  void setTimeOut(int msecs);
+  int timeOut()const;
 signals:
   void infoReceived(const QString& message);
   void errorReceived(const QString& errorMessage);

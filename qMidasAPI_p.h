@@ -52,6 +52,11 @@ public:
 public slots:
   void processReply(QNetworkReply* reply);
   void print(const QString& msg);
+protected slots:
+  /// Called when a query hasn't had any progress for a given TimeOut time.
+  /// Note: sender() is used.
+  void queryTimeOut();
+  void queryProgress();
 
 public:
   QString MidasUrl;
@@ -59,6 +64,7 @@ public:
 
   QNetworkAccessManager* NetworkManager;
   QScriptEngine ScriptEngine;
+  int TimeOut;
 };
 
 // --------------------------------------------------------------------------

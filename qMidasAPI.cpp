@@ -70,9 +70,11 @@ void qMidasAPIResult::setError(const QString& error)
 
 // --------------------------------------------------------------------------
 qMidasAPIPrivate::qMidasAPIPrivate(qMidasAPI& object)
-  :q_ptr(&object)
+  : q_ptr(&object)
 {
   this->ResponseType = "json";
+  this->NetworkManager = 0;
+  this->TimeOut = 0;
 }
 
 // --------------------------------------------------------------------------
@@ -114,8 +116,18 @@ QUuid qMidasAPIPrivate::postQuery(const QUrl& url)
   queryRequest.setUrl(url);
   QUuid queryUuid = QUuid::createUuid();
   q->emit infoReceived("Post query: " + url.toString());
-  QNetworkReply * queryReply = this->NetworkManager->get(queryRequest);
+  QNetworkReply* queryReply = this->NetworkManager->get(queryRequest);
   queryReply->setProperty("uuid", queryUuid.toString());
+  if (this->TimeOut > 0)
+    {
+    QTimer* timeOut = new QTimer(queryReply);
+    timeOut->setSingleShot(true);
+    QObject::connect(timeOut, SIGNAL(timeout()),
+                     this, SLOT(queryTimeOut()));
+    timeOut->start(this->TimeOut);
+    QObject::connect(queryReply, SIGNAL(downloadProgress(qint64,qint64)),
+                     this, SLOT(queryProgress()));
+    }
   return queryUuid;
 }
 
@@ -204,6 +216,37 @@ void qMidasAPIPrivate::print(const QString& msg)
 }
 
 // --------------------------------------------------------------------------
+void qMidasAPIPrivate::queryProgress()
+{
+  Q_Q(qMidasAPI);
+  QNetworkReply* reply = qobject_cast<QNetworkReply*>(this->sender());
+  Q_ASSERT(reply);
+  if (!reply)
+    {
+    return;
+    }
+  // We received some progress so we postpone the timeout if any.
+  QTimer* timer = reply->findChild<QTimer*>();
+  if (timer)
+    {
+    timer->start();
+    }
+}
+
+// --------------------------------------------------------------------------
+void qMidasAPIPrivate::queryTimeOut()
+{
+  Q_Q(qMidasAPI);
+  QTimer* timer = qobject_cast<QTimer*>(this->sender());
+  Q_ASSERT(timer);
+  QNetworkReply* reply = qobject_cast<QNetworkReply*>(timer->parent());
+  Q_ASSERT(reply);
+  reply->abort();
+  //reply->setError(QNetworkReply::TimeoutError,
+  //   q->tr("Time out: No progress for %1 seconds.").arg(timer->interval()));
+}
+
+// --------------------------------------------------------------------------
 // qMidasAPI methods
 
 // --------------------------------------------------------------------------
@@ -237,6 +280,20 @@ void qMidasAPI::setMidasUrl(const QString& newMidasUrl)
 }
 
 // --------------------------------------------------------------------------
+int qMidasAPI::timeOut()const
+{
+  Q_D(const qMidasAPI);
+  return d->TimeOut;
+}
+
+// --------------------------------------------------------------------------
+void qMidasAPI::setTimeOut(int msecs)
+{
+  Q_D(qMidasAPI);
+  d->TimeOut = msecs;
+}
+
+// --------------------------------------------------------------------------
 QUuid qMidasAPI::query(const QString& method, const ParametersType& parameters)
 {
   Q_D(qMidasAPI);
@@ -253,6 +310,7 @@ QList<QVariantMap> qMidasAPI::synchronousQuery(
 {
   qMidasAPI midasAPI;
   midasAPI.setMidasUrl(midasUrl);
+  midasAPI.setTimeOut(maxWaitingTimeInMSecs);
   midasAPI.query(method, parameters);
   qMidasAPIResult queryResult;
   QObject::connect(&midasAPI, SIGNAL(resultReceived(QUuid,QList<QVariantMap>)),
@@ -262,13 +320,23 @@ QList<QVariantMap> qMidasAPI::synchronousQuery(
   QEventLoop eventLoop;
   QObject::connect(&midasAPI, SIGNAL(resultReceived(QUuid,QList<QVariantMap>)),
                    &eventLoop, SLOT(quit()));
-  QTimer::singleShot(maxWaitingTimeInMSecs, &eventLoop, SLOT(quit()));
+  // Time out will fire an error which will quit the event loop.
+  QObject::connect(&midasAPI, SIGNAL(errorReceived(QString)),
+                   &eventLoop, SLOT(quit()));
   eventLoop.exec();
   ok = queryResult.Error.isNull();
   if (!ok)
     {
     QVariantMap map;
     map["queryError"] = queryResult.Error;
+    queryResult.Result.push_front(map);
+    }
+  if (queryResult.Result.count() == 0)
+    {
+    // \tbd
+    Q_ASSERT(queryResult.Result.count());
+    QVariantMap map;
+    map["queryError"] = tr("Unknown error");
     queryResult.Result.push_front(map);
     }
   return queryResult.Result;
