@@ -1,0 +1,20 @@
+
+# Import qRestAPI targets
+IF(NOT qRestAPI_EXPORTS_INCLUDED)
+  INCLUDE("@qRestAPI_BINARY_DIR@/qRestAPIExports.cmake")
+  SET(qRestAPI_EXPORTS_INCLUDED 1)
+ENDIF()
+
+FIND_LIBRARY(qRestAPI_LIBRARIES qRestAPI
+  PATHS
+    "@qRestAPI_BINARY_DIR@/"
+    "@qRestAPI_BINARY_DIR@/Release"
+    "@qRestAPI_BINARY_DIR@/Debug"
+  NO_DEFAULT_PATH
+  )
+MARK_AS_ADVANCED(qRestAPI_LIBRARIES)
+
+SET(qRestAPI_INCLUDE_DIRS "@qRestAPI_INCLUDE_DIRS_CONFIG@")
+
+# The location of the UseqRestAPI.cmake file.
+SET(qRestAPI_USE_FILE "@qRestAPI_USE_FILE_CONFIG@")

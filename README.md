@@ -1,6 +1,7 @@
 # OVERVIEW
 
-qMIDASAPI is a cross-platform [Qt-based](http://doc.qt.nokia.com/4.7/qt4-7-intro.html) library allowing to easily query a [Midas](http://midas.kitware.com) server.
+qRestAPI is a cross-platform [Qt-based](http://doc.qt.nokia.com/4.7/qt4-7-intro.html) library 
+allowing to easily query a [Midas](http://midas.kitware.com) or [XNAT](http://xnat.org) server.
 
 ## Prerequisites
 
@@ -9,13 +10,12 @@ qMIDASAPI is a cross-platform [Qt-based](http://doc.qt.nokia.com/4.7/qt4-7-intro
 
 ## How to build
 
-    git clone git://github.com/Slicer/qMidasAPI.git
-    mkdir qMidasAPI-build
-    cd qMidasAPI-build
-    cmake -DQT_QMAKE_EXECUTABLE:FILEPATH=/path/to/cmake ../qMidasAPI
+    git clone git://github.com/commontk/qRestAPI.git
+    mkdir qRestAPI-build
+    cd qRestAPI-build
+    cmake -DQT_QMAKE_EXECUTABLE:FILEPATH=/path/to/cmake ../qRestAPI
     make -j4
     ctest
 
 ## Contribute
 Fork + pull.
-

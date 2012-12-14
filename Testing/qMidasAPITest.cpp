@@ -1,6 +1,6 @@
 /*==============================================================================
 
-  Program: qMidasAPI
+  Library: qRestAPI
 
   Copyright (c) 2010 Kitware Inc.
 
@@ -110,9 +110,9 @@ int qMidasAPITest(int argc, char* argv[])
   // --------------------------------------------------------------------------
   // Successfull query: midas.version
   // --------------------------------------------------------------------------
-  QSignalSpy errorSpy(&midasAPI, SIGNAL(errorReceived(QString)));
+  QSignalSpy errorSpy(&midasAPI, SIGNAL(errorReceived(QUuid,QString)));
   QSignalSpy receivedSpy(&midasAPI, SIGNAL(resultReceived(QUuid,QList<QVariantMap>)));
-  QUuid queryUuid = midasAPI.query("midas.version");
+  QUuid queryUuid = midasAPI.get("midas.version");
 
   // Give 5 seconds for the server to answer
   wait(5000);
@@ -132,7 +132,7 @@ int qMidasAPITest(int argc, char* argv[])
   // --------------------------------------------------------------------------
   // Fail query: midas.notafunction
   // --------------------------------------------------------------------------
-  queryUuid = midasAPI.query("midas.notafunction");
+  queryUuid = midasAPI.get("midas.notafunction");
 
   // Give 5 seconds for the server to answer
   wait(5000);

@@ -1,6 +1,6 @@
 /*==============================================================================
 
-  Program: qMidasAPI
+  Library: qRestAPI
 
   Copyright (c) 2010 Kitware Inc.
 
@@ -21,50 +21,28 @@
 #ifndef __qMidasAPI_p_h
 #define __qMidasAPI_p_h
 
-// Qt includes
-#include <QHash>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QScriptEngine>
-
 // qMidasAPI includes
 #include "qMidasAPI.h"
+
+#include <QList>
+#include <QScriptEngine>
+#include <QScriptValue>
 
 // --------------------------------------------------------------------------
 class qMidasAPIPrivate : public QObject
 {
   Q_DECLARE_PUBLIC(qMidasAPI);
   Q_OBJECT
-protected:
+
+  typedef QObject Superclass;
+
   qMidasAPI* const q_ptr;
-public:
-  typedef qMidasAPIPrivate Self;
-  qMidasAPIPrivate(qMidasAPI& object);
+  QScriptEngine ScriptEngine;
 
-  virtual void init();
-
-  QUrl createUrl(const QString& method, const qMidasAPI::ParametersType& parameters);
-  QUuid postQuery(const QUrl& queryUrl);
-
-  QList<QVariantMap> parseResult(const QScriptValue& scriptValue);
-  QString qVariantMapToString(const QList<QVariantMap>& result)const;
-
-public slots:
-  void processReply(QNetworkReply* reply);
-  void print(const QString& msg);
-protected slots:
-  /// Called when a query hasn't had any progress for a given TimeOut time.
-  /// Note: sender() is used.
-  void queryTimeOut();
-  void queryProgress();
-
-public:
-  QString MidasUrl;
   QString ResponseType;
 
-  QNetworkAccessManager* NetworkManager;
-  QScriptEngine ScriptEngine;
-  int TimeOut;
+public:
+  qMidasAPIPrivate(qMidasAPI* object);
 };
 
 // --------------------------------------------------------------------------
@@ -75,9 +53,10 @@ public:
   QUuid QueryUuid;
   QList<QVariantMap> Result;
   QString Error;
+
 public slots:
-  void setResult(QUuid queryUuid, const QList<QVariantMap>& result);
-  void setError(const QString& error);
+  void setResult(const QUuid& queryUuid, const QList<QVariantMap>& result);
+  void setError(const QUuid& queryUuid, const QString& error);
 };
 
 #endif

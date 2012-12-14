@@ -1,6 +1,6 @@
 /*==============================================================================
 
-  Program: qMidasAPI
+  Library: qRestAPI
 
   Copyright (c) 2010 Kitware Inc.
 
@@ -21,13 +21,7 @@
 #ifndef __qMidasAPI_h
 #define __qMidasAPI_h
 
-// Qt includes
-#include <QMap>
-#include <QObject>
-#include <QUuid>
-
-template <class Key, class T> class QMap;
-typedef QMap<QString, QVariant> QVariantMap;
+#include "qRestAPI.h"
 
 class qMidasAPIPrivate;
 
@@ -44,32 +38,24 @@ class qMidasAPIPrivate;
 /// midas.query("midas.version");
 /// ...
 /// </code>
-class qMidasAPI : public QObject
+class qMidasAPI : public qRestAPI
 {
   Q_OBJECT
   /// Url of the Midas server. e.g. "http://slicer.kitware.com/midas3"
+  /// @deprecated Use the serverUrl property
   Q_PROPERTY(QString midasUrl READ midasUrl WRITE setMidasUrl)
 
-  /// Max time to wait until last progress of a query
-  Q_PROPERTY(int timeOut READ timeOut WRITE setTimeOut)
+  typedef qRestAPI Superclass;
+
 public:
-  typedef QObject Superclass;
   explicit qMidasAPI(QObject*parent = 0);
   virtual ~qMidasAPI();
 
+  /// @deprecated Use qRestAPI::Parameters.
+  typedef Parameters ParametersType;
+
   QString midasUrl()const;
   void setMidasUrl(const QString& newMidasUrl);
-
-  typedef QMap<QString, QString> ParametersType;
-  /// Post a query on the Midas server. The \a method and \parameters
-  /// are used to compose the query.
-  /// errorReceived() is emitted if no server is found or if the server sends
-  /// errors.
-  /// resultReceived() is emitted when a result is received from the server,
-  /// it is fired even if errors are received.
-  /// Returns a unique identifiant of the posted query.
-  QUuid query(const QString& method,
-    const ParametersType& parameters = ParametersType());
 
   /// Utility function that waits \a maxWaitingTimeInMSecs msecs for the result
   /// of the query. Returns the answer of the server or an empty map if the
@@ -77,29 +63,26 @@ public:
   /// If an error is emitted, "queryError" is added to the output.
   /// Internally, a QEventLoop is used so it can have side effects on your
   /// application.
+  /// @deprecated Use the non-static version from qRestAPI.
   static QList<QVariantMap> synchronousQuery(bool &ok,
     const QString& midasUrl,
-    const QString& method, const ParametersType& parameters = ParametersType(),
+    const QString& method,
+    const ParametersType& parameters = ParametersType(),
     int maxWaitingTimeInMSecs = 2500);
 
-  /// Utility function that transforms a QList of QVariantMap into a string.
-  /// Mostly for debug purpose.
-  static QString qVariantMapListToString(const QList<QVariantMap>& variants);
-
-  void setTimeOut(int msecs);
-  int timeOut()const;
 signals:
-  void infoReceived(const QString& message);
-  void errorReceived(const QString& errorMessage);
-  void resultReceived(QUuid queryUuid, const QList<QVariantMap>&);
+  void errorReceived(QUuid queryId, QString error);
+  void resultReceived(QUuid queryId, QList<QVariantMap> result);
 
 protected:
-  QScopedPointer<qMidasAPIPrivate> d_ptr;
+  QUrl createUrl(const QString& method, const qRestAPI::Parameters& parameters);
+  void parseResponse(qRestResult* restResult, const QByteArray& response);
 
 private:
+  QScopedPointer<qMidasAPIPrivate> d_ptr;
+
   Q_DECLARE_PRIVATE(qMidasAPI);
   Q_DISABLE_COPY(qMidasAPI);
 };
 
 #endif
-

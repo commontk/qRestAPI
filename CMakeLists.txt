@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.2)
 
-PROJECT(qMidasAPI)
+PROJECT(qRestAPI)
 
 OPTION(BUILD_TESTING "Test the project" ON)
 
@@ -12,17 +12,30 @@ SET(KIT_SRCS
   qMidasAPI.cpp
   qMidasAPI.h
   qMidasAPI_p.h
+  qRestAPI.cpp
+  qRestAPI.h
+  qRestAPI_p.h
+  qRestResult.cpp
+  qRestResult.h
+  qXnatAPI.cpp
+  qXnatAPI.h
+  qXnatAPI_p.h
   )
 
 SET(KIT_MOC_SRCS
   qMidasAPI.h
   qMidasAPI_p.h
+  qRestAPI.h
+  qRestAPI_p.h
+  qRestResult.h
+  qXnatAPI.h
+  qXnatAPI_p.h
   )
 
 QT4_WRAP_CPP(KIT_MOC_OUTPUT ${KIT_MOC_SRCS})
 
-ADD_LIBRARY(qMidasAPI ${KIT_SRCS} ${KIT_MOC_OUTPUT})
-TARGET_LINK_LIBRARIES(qMidasAPI ${QT_LIBRARIES})
+ADD_LIBRARY(${PROJECT_NAME} ${KIT_SRCS} ${KIT_MOC_OUTPUT})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${QT_LIBRARIES})
 
 # To fix compilation problem: relocation R_X86_64_32 against `a local symbol' can not be
 # used when making a shared object; recompile with -fPIC
@@ -35,4 +48,4 @@ IF(BUILD_TESTING)
   ADD_SUBDIRECTORY(Testing)
 ENDIF()
 
-INCLUDE(CMake/GenerateqMidasAPIConfig.cmake)
+INCLUDE(CMake/GenerateqRestAPIConfig.cmake)
