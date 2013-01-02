@@ -22,45 +22,43 @@
 
 #include "qXnatAPI.h"
 
-class TestObject : public QObject
-{
-public:
-  mutable QString id;
-  mutable QString name;
-  void operator=(const TestObject& other) const {
-    id = other.id;
-    name = other.name;
-  }
-};
+class qXnatAPITestCasePrivate;
 
-class TestList : public QObject
-{
-
-};
-
-class QXnatAPITest: public QObject
+class qXnatAPITestCase: public QObject
 {
   Q_OBJECT
 
   void wait(int msec);
 
+public:
+  explicit qXnatAPITestCase();
+  virtual ~qXnatAPITestCase();
+
+  void testCreateExperiment();
+  void testDeleteExperiment();
+
+  void testDownloadScans();
+
 private slots:
   void initTestCase();
 
-  void testReplaceChild();
   void testProjectList();
   void testProject();
 
+  void testCreateProject();
   void testCreateSubject();
   void testDeleteSubject();
+  void testDeleteProject();
 
-  void testDownloadScans();
   void testWaitFor();
 
   void cleanupTestCase();
 
 private:
-  qXnatAPI* xnat;
+  QScopedPointer<qXnatAPITestCasePrivate> d_ptr;
+
+  Q_DECLARE_PRIVATE(qXnatAPITestCase);
+  Q_DISABLE_COPY(qXnatAPITestCase);
 };
 
 // --------------------------------------------------------------------------

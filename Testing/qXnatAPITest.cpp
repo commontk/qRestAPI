@@ -28,47 +28,73 @@
 #include <QUrl>
 #include <QUuid>
 
-// --------------------------------------------------------------------------
-void QXnatAPITest::initTestCase()
+class qXnatAPITestCasePrivate
 {
-  QString serverUrl("http://localhost:8080/genfi");
-  QString userName("admin");
-  QString password("admin");
+public:
+  qXnatAPI* xnat;
 
-  this->xnat = new qXnatAPI();
-  this->xnat->setServerUrl(serverUrl);
+  QString serverUrl;
+  QString userName;
+  QString password;
+
+  QString project;
+  QString subject;
+  QString experiment;
+
+  qRestAPI::Parameters xmlFormat;
+};
+
+// --------------------------------------------------------------------------
+qXnatAPITestCase::qXnatAPITestCase()
+: d_ptr(new qXnatAPITestCasePrivate())
+{
+}
+
+// --------------------------------------------------------------------------
+qXnatAPITestCase::~qXnatAPITestCase()
+{
+}
+
+// --------------------------------------------------------------------------
+void qXnatAPITestCase::initTestCase()
+{
+  Q_D(qXnatAPITestCase);
+
+//  d->serverUrl = "http://localhost:8080/genfi";
+//  d->userName = "admin";
+//  d->password = "admin";
+  d->serverUrl = "https://central.xnat.org";
+  d->userName = "ctk";
+  d->password = "ctk";
+
+  QString id = QUuid::createUuid().toString().mid(1, 4);
+  qDebug() << "ID --------------- :" << id;
+  d->project = QString("qXnat_%1").arg(id);
+  d->subject = QString("Subject-0001");
+  d->experiment = QString("Experiment-0001");
+
+  d->xmlFormat["format"] = "xml";
+
+  d->xnat = new qXnatAPI();
+  d->xnat->setServerUrl(d->serverUrl);
+  d->xnat->setSuppressSslErrors(true);
 
   qXnatAPI::RawHeaders rawHeaders;
   rawHeaders["Authorization"] = "Basic " +
-      QByteArray(QString("%1:%2").arg(userName).arg(password).toAscii()).toBase64();
-  this->xnat->setDefaultRawHeaders(rawHeaders);
+      QByteArray(QString("%1:%2").arg(d->userName).arg(d->password).toAscii()).toBase64();
+  rawHeaders["User-Agent"] = "Qt";
+  d->xnat->setDefaultRawHeaders(rawHeaders);
 }
 
-void QXnatAPITest::testReplaceChild()
+void qXnatAPITestCase::testProjectList()
 {
-  TestObject* testObject1 = new TestObject();
-  testObject1->id = "test 1";
-  testObject1->name = "name 1";
-  TestObject* testObject2 = new TestObject();
-  testObject2->id = "test 2";
-  testObject2->name = "name 2";
-  TestList* testList = new TestList();
-  testObject1->setParent(testList);
-//  qDebug() << "name before replacement:" << qobject_cast<TestObject*>(testList->children()[0])->name;
-//  const QObjectList& children = testList->children();
-//  const TestObject* to1 = qobject_cast<TestObject*>(children[0]);
-////  testList->children()[0] = testObject2;
-////  *testList->children()[0] = *testObject2;
-//  qDebug() << "name after replacement:" << qobject_cast<TestObject*>(testList->children()[0])->name;
-}
+  Q_D(qXnatAPITestCase);
 
-void QXnatAPITest::testProjectList()
-{
   bool success = false;
 
   QString query("/REST/projects");
   QList<QVariantMap> result;
-  success = xnat->sync(xnat->get(query), result);
+  success = d->xnat->sync(d->xnat->get(query), result);
 
   QVERIFY(success);
 
@@ -83,36 +109,37 @@ void QXnatAPITest::testProjectList()
 //    ++i;
 //  }
 
-//  QCOMPARE(response.size(), 3);
+  QVERIFY(result.size() > 0);
 
   query = "/REST/INVALID";
-  success = xnat->sync(xnat->get(query));
+  success = d->xnat->sync(d->xnat->get(query));
 
   QVERIFY(!success);
 }
 
-void QXnatAPITest::testProject()
+void qXnatAPITestCase::testProject()
 {
-  qDebug() << "QXnatAPITest::testProject()";
-  QString projectName("DEMO3");
-  QString projectRequest = QString("/REST/projects/%1").arg(projectName);
+  Q_D(qXnatAPITestCase);
+
+  QString projectRequest = QString("/REST/projects/%1").arg(d->project);
   QList<QVariantMap> response;
   QUuid requestId;
   bool success;
 
   // Query project:
-  if (xnat->sync(xnat->get(projectRequest)))
+  if (d->xnat->sync(d->xnat->get(projectRequest)))
   {
     // Delete project:
-    QVERIFY(xnat->sync(xnat->del(projectRequest)));
+    QVERIFY(d->xnat->sync(d->xnat->del(projectRequest)));
     // Query project (expected not to exist):
-    QVERIFY(!xnat->sync(xnat->get(projectRequest)));
+    QVERIFY(!d->xnat->sync(d->xnat->get(projectRequest)));
   }
 
   // Create project:
   qDebug() << "CREATE PROJECT";
-  QUuid queryId = xnat->put(projectRequest);
-  success = xnat->sync(queryId, response);
+  qDebug() << projectRequest;
+  QUuid queryId = d->xnat->put(projectRequest);
+  success = d->xnat->sync(queryId, response);
   QVERIFY(success);
 //  foreach (QVariantMap map, response)
 //  {
@@ -123,43 +150,101 @@ void QXnatAPITest::testProject()
 //  }
 
   // Query project:
-  requestId = xnat->get(projectRequest);
+  // TODO Without the format=xml parameter the central.xnat.org returns a HTML.
+  // On other sites (v1.5 probably) a html response comes only if an error occurs.
+  // The error detection should be corrected.
+  requestId = d->xnat->get(projectRequest, d->xmlFormat);
   qDebug() << queryId << "QUERY";
-  success = xnat->sync(requestId, response);
+  success = d->xnat->sync(requestId, response);
   QVERIFY(success);
 
   // Delete project:
-  requestId = xnat->del(projectRequest);
-  success = xnat->sync(requestId);
+  requestId = d->xnat->del(projectRequest);
+  success = d->xnat->sync(requestId);
   QVERIFY(success);
 }
 
-void QXnatAPITest::testCreateSubject()
+void qXnatAPITestCase::testCreateProject()
 {
-  QString projectName("DEMO");
-  QString subjectName("GENFI_S01001");
-  QString request = QString("/REST/projects/%1/subjects/%2").arg(projectName, subjectName);
+  Q_D(qXnatAPITestCase);
+
+  QString request = QString("/REST/projects/%1").arg(d->project);
   QList<QVariantMap> response;
-  QUuid requestId = xnat->put(request);
-  bool success = xnat->sync(requestId, response);
+  QUuid requestId = d->xnat->put(request);
+  bool success = d->xnat->sync(requestId, response);
 
   QVERIFY(success);
 }
 
-void QXnatAPITest::testDeleteSubject()
+void qXnatAPITestCase::testCreateSubject()
 {
-  QString projectName("DEMO");
-  QString subjectName("GENFI_S01001");
-  QString request = QString("/REST/projects/%1/subjects/%2").arg(projectName, subjectName);
+  Q_D(qXnatAPITestCase);
+
+  QString request = QString("/REST/projects/%1/subjects/%2").arg(d->project, d->subject);
   QList<QVariantMap> response;
-  QUuid requestId = xnat->del(request);
-  bool success = xnat->sync(requestId, response);
+  QUuid requestId = d->xnat->put(request);
+  bool success = d->xnat->sync(requestId, response);
 
   QVERIFY(success);
 }
 
-void QXnatAPITest::testDownloadScans()
+void qXnatAPITestCase::testCreateExperiment()
 {
+  Q_D(qXnatAPITestCase);
+
+  // TODO Need PUT contents
+
+  QString request = QString("/REST/projects/%1/subjects/%2/experiments/%3")
+      .arg(d->project, d->subject, d->experiment);
+  QList<QVariantMap> response;
+  QUuid requestId = d->xnat->put(request);
+  bool success = d->xnat->sync(requestId, response);
+
+  QVERIFY(success);
+}
+
+void qXnatAPITestCase::testDeleteExperiment()
+{
+  Q_D(qXnatAPITestCase);
+
+  QString request = QString("/REST/projects/%1/subjects/%2/experiments/%3")
+      .arg(d->project, d->subject, d->experiment);
+  QList<QVariantMap> response;
+  QUuid requestId = d->xnat->del(request);
+  bool success = d->xnat->sync(requestId, response);
+
+  QVERIFY(success);
+}
+
+void qXnatAPITestCase::testDeleteSubject()
+{
+  Q_D(qXnatAPITestCase);
+
+  QString request = QString("/REST/projects/%1/subjects/%2").arg(d->project, d->subject);
+  QList<QVariantMap> response;
+  QUuid requestId = d->xnat->del(request);
+  bool success = d->xnat->sync(requestId, response);
+
+  QVERIFY(success);
+}
+
+void qXnatAPITestCase::testDeleteProject()
+{
+  Q_D(qXnatAPITestCase);
+
+  QString projectName("DEMO");
+  QString request = QString("/REST/projects/%1").arg(d->project);
+  QList<QVariantMap> response;
+  QUuid requestId = d->xnat->del(request);
+  bool success = d->xnat->sync(requestId, response);
+
+  QVERIFY(success);
+}
+
+void qXnatAPITestCase::testDownloadScans()
+{
+  Q_D(qXnatAPITestCase);
+
   QString projectName("DEMO");
   QString subjectName("GENFI_S00001");
   QString experimentName("GENFI_E00007");
@@ -177,12 +262,12 @@ void QXnatAPITest::testDownloadScans()
   qRestAPI::Parameters parameters;
   parameters["format"] = "zip";
   QVERIFY(!testFile.exists());
-  QUuid downloadQueryId = this->xnat->download(fileName, downloadQuery, parameters);
+  QUuid downloadQueryId = d->xnat->download(fileName, downloadQuery, parameters);
 
   QString projectQuery("/REST/projects");
-  QUuid projectQueryId = this->xnat->get(projectQuery);
+  QUuid projectQueryId = d->xnat->get(projectQuery);
 
-  bool ok = this->xnat->sync(downloadQueryId);
+  bool ok = d->xnat->sync(downloadQueryId);
   QVERIFY(ok);
   QVERIFY(testFile.exists());
   QCOMPARE(testFile.size(), expectedSize);
@@ -193,28 +278,32 @@ void QXnatAPITest::testDownloadScans()
   QVERIFY(!testFile.exists());
 }
 
-void QXnatAPITest::testWaitFor()
+void qXnatAPITestCase::testWaitFor()
 {
+  Q_D(qXnatAPITestCase);
+
   bool ok = false;
   QList<QVariantMap> result;
 
   QString query("/REST/projects");
-  QUuid queryId = xnat->get(query);
-  ok = xnat->sync(queryId);
+  QUuid queryId = d->xnat->get(query);
+  ok = d->xnat->sync(queryId);
   QVERIFY(ok);
-  ok = xnat->sync(xnat->get(query));
+  ok = d->xnat->sync(d->xnat->get(query));
   QVERIFY(ok);
 }
 
-void QXnatAPITest::cleanupTestCase()
+void qXnatAPITestCase::cleanupTestCase()
 {
-  delete this->xnat;
+  Q_D(qXnatAPITestCase);
+
+  delete d->xnat;
 }
 
 // --------------------------------------------------------------------------
 int qXnatAPITest(int argc, char* argv[])
 {
   QCoreApplication app(argc, argv);
-  QXnatAPITest test;
+  qXnatAPITestCase test;
   return QTest::qExec(&test, argc, argv);
 }
