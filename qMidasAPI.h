@@ -23,6 +23,8 @@
 
 #include "qRestAPI.h"
 
+#include "qRestAPI_Export.h"
+
 class qMidasAPIPrivate;
 
 /// qMidasAPI is a simple interface class to communicate with a Midas3 public
@@ -38,7 +40,7 @@ class qMidasAPIPrivate;
 /// midas.query("midas.version");
 /// ...
 /// </code>
-class qMidasAPI : public qRestAPI
+class qRestAPI_EXPORT qMidasAPI : public qRestAPI
 {
   Q_OBJECT
   /// Url of the Midas server. e.g. "http://slicer.kitware.com/midas3"

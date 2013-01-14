@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.2)
 
 PROJECT(qRestAPI)
 
+OPTION(BUILD_SHARED_LIBS "Build shared library" ON)
 OPTION(BUILD_TESTING "Test the project" ON)
 
 # HACK: QtXml is required because of "http://www.richelbilderbeek.nl/CppLinkErrorUndefinedReferenceToQListData.htm"

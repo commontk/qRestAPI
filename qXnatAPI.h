@@ -19,11 +19,13 @@
 
 #include "qRestAPI.h"
 
+#include "qRestAPI_Export.h"
+
 class qXnatAPIPrivate;
 
 /// qXnatAPI is a simple interface class to communicate with an XNAT
 /// server through its REST API.
-class qXnatAPI : public qRestAPI
+class qRestAPI_EXPORT qXnatAPI : public qRestAPI
 {
   Q_OBJECT
 

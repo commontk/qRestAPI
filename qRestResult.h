@@ -24,10 +24,12 @@
 // qRestAPI includes
 #include "qRestAPI.h"
 
+#include "qRestAPI_Export.h"
+
 class QIODevice;
 
 // --------------------------------------------------------------------------
-class qRestResult : public QObject
+class qRestAPI_EXPORT qRestResult : public QObject
 {
   Q_OBJECT
 

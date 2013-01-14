@@ -28,6 +28,8 @@
 #include <QUuid>
 #include <QVariant>
 
+#include "qRestAPI_Export.h"
+
 template <class Key, class T> class QMap;
 typedef QMap<QString, QVariant> QVariantMap;
 
@@ -55,7 +57,7 @@ class qRestResult;
 /// ...
 /// delete midas;
 /// </code>
-class qRestAPI : public QObject
+class qRestAPI_EXPORT qRestAPI : public QObject
 {
   Q_OBJECT
 
