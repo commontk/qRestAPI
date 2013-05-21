@@ -4,10 +4,10 @@
 # settings to use qRestAPI.
 #
 
-IF(NOT qRestAPI_USE_FILE_INCLUDED)
-  SET(qRestAPI_USE_FILE_INCLUDED 1)
+if(NOT qRestAPI_USE_FILE_INCLUDED)
+  set(qRestAPI_USE_FILE_INCLUDED 1)
   
   # Add include directories needed to use qRestAPI.
-  INCLUDE_DIRECTORIES(${qRestAPI_INCLUDE_DIRS})
+  include_directories(${qRestAPI_INCLUDE_DIRS})
   
-ENDIF()
+endif()

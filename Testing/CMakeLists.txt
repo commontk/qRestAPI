@@ -1,27 +1,27 @@
-INCLUDE_DIRECTORIES(
+include_directories(
   ${qRestAPI_SOURCE_DIR}
   )
 
-CREATE_TEST_SOURCELIST(qRestAPITests_SRC
+create_test_sourcelist(qRestAPITests_SRC
   qRestAPITests.cpp
   qMidasAPITest.cpp
   qXnatAPITest.cpp
   )
 
-ADD_DEFINITIONS(-D_CRT_SECURE_NO_DEPRECATE)
+add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
 
-SET(qXnatAPITest_MOC_SRCS
+set(qXnatAPITest_MOC_SRCS
   qXnatAPITest.h
   )
 
 QT4_WRAP_CPP(qXnatAPITest_MOC_OUTPUT ${qXnatAPITest_MOC_SRCS})
 
-ADD_EXECUTABLE(qRestAPITests ${qRestAPITests_SRC} ${qXnatAPITest_MOC_OUTPUT})
-TARGET_LINK_LIBRARIES(qRestAPITests qRestAPI)
+add_executable(qRestAPITests ${qRestAPITests_SRC} ${qXnatAPITest_MOC_OUTPUT})
+target_link_libraries(qRestAPITests qRestAPI)
 
-MACRO(SIMPLE_TEST TESTNAME)
-  ADD_TEST(NAME ${TESTNAME} COMMAND qRestAPITests ${TESTNAME})
-ENDMACRO()
+macro(SIMPLE_TEST TESTNAME)
+  add_test(NAME ${TESTNAME} COMMAND qRestAPITests ${TESTNAME})
+endmacro()
 
 SIMPLE_TEST(qMidasAPITest)
 SIMPLE_TEST(qXnatAPITest)

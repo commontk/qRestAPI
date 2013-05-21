@@ -1,15 +1,15 @@
 cmake_minimum_required(VERSION 2.8.2)
 
-PROJECT(qRestAPI)
+project(qRestAPI)
 
-OPTION(BUILD_SHARED_LIBS "Build shared library" ON)
-OPTION(BUILD_TESTING "Test the project" ON)
+option(BUILD_SHARED_LIBS "Build shared library" ON)
+option(BUILD_TESTING "Test the project" ON)
 
 # HACK: QtXml is required because of "http://www.richelbilderbeek.nl/CppLinkErrorUndefinedReferenceToQListData.htm"
-FIND_PACKAGE(Qt4 4.6.2 COMPONENTS QtCore QtGui QtNetwork QtScript QtXml QtTest REQUIRED)
-INCLUDE(${QT_USE_FILE})
+find_package(Qt4 4.6.2 COMPONENTS QtCore QtGui QtNetwork QtScript QtXml QtTest REQUIRED)
+include(${QT_USE_FILE})
 
-SET(KIT_SRCS
+set(KIT_SRCS
   qMidasAPI.cpp
   qMidasAPI.h
   qMidasAPI_p.h
@@ -23,7 +23,7 @@ SET(KIT_SRCS
   qXnatAPI_p.h
   )
 
-SET(KIT_MOC_SRCS
+set(KIT_MOC_SRCS
   qMidasAPI.h
   qMidasAPI_p.h
   qRestAPI.h
@@ -35,18 +35,19 @@ SET(KIT_MOC_SRCS
 
 QT4_WRAP_CPP(KIT_MOC_OUTPUT ${KIT_MOC_SRCS})
 
-ADD_LIBRARY(${PROJECT_NAME} ${KIT_SRCS} ${KIT_MOC_OUTPUT})
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${QT_LIBRARIES})
+add_library(${PROJECT_NAME} ${KIT_SRCS} ${KIT_MOC_OUTPUT})
+target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES})
 
 # To fix compilation problem: relocation R_X86_64_32 against `a local symbol' can not be
 # used when making a shared object; recompile with -fPIC
-IF(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
-  SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-fPIC")
-ENDIF()
+if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+  set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-fPIC")
+endif()
 
-INCLUDE(CTest)
-IF(BUILD_TESTING)
-  ADD_SUBDIRECTORY(Testing)
-ENDIF()
+include(CTest)
+if(BUILD_TESTING)
+  add_subdirectory(Testing)
+endif()
 
-INCLUDE(CMake/GenerateqRestAPIConfig.cmake)
+include(CMake/GenerateqRestAPIConfig.cmake)
+
