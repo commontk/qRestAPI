@@ -5,14 +5,7 @@ if(NOT qRestAPI_EXPORTS_INCLUDED)
   set(qRestAPI_EXPORTS_INCLUDED 1)
 endif()
 
-find_library(qRestAPI_LIBRARIES qRestAPI
-  PATHS
-    "@qRestAPI_BINARY_DIR@/"
-    "@qRestAPI_BINARY_DIR@/Release"
-    "@qRestAPI_BINARY_DIR@/Debug"
-  NO_DEFAULT_PATH
-  )
-mark_as_advanced(qRestAPI_LIBRARIES)
+set(qRestAPI_LIBRARIES "qRestAPI")
 
 set(qRestAPI_INCLUDE_DIRS "@qRestAPI_INCLUDE_DIRS_CONFIG@")
 
