@@ -9,6 +9,13 @@ option(BUILD_TESTING "Test the project" ON)
 find_package(Qt4 4.6.2 COMPONENTS QtCore QtGui QtNetwork QtScript QtXml QtTest REQUIRED)
 include(${QT_USE_FILE})
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+configure_file(
+  qRestAPI_Export.h.in
+  ${CMAKE_CURRENT_BINARY_DIR}/qRestAPI_Export.h
+  )
+
 set(KIT_SRCS
   qMidasAPI.cpp
   qMidasAPI.h
