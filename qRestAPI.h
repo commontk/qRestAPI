@@ -211,7 +211,6 @@ protected:
   virtual QUrl createUrl(const QString& method, const qRestAPI::Parameters& parameters);
   virtual void parseResponse(qRestResult* restResult, const QByteArray& response);
 
-  static QString qVariantMapToString(const QList<QVariantMap>& result);
 private:
   QScopedPointer<qRestAPIPrivate> d_ptr;
 
