@@ -24,5 +24,13 @@
 #  define qRestAPI_EXPORT
 #endif
 
+#if !defined(qRestAPI_EXPORT)
+#  if defined(BUILD_SHARED_LIBS)
+#    define qRestAPI_EXPORT Q_DECL_EXPORT
+#  else
+#    define qRestAPI_EXPORT
+#  endif
+#endif
+
 #endif
 

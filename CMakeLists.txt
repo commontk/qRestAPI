@@ -9,7 +9,8 @@ option(BUILD_TESTING "Test the project" ON)
 find_package(Qt4 4.6.2 COMPONENTS QtCore QtGui QtNetwork QtScript QtXml QtTest REQUIRED)
 include(${QT_USE_FILE})
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(qRestAPI_INCLUDE_DIRS ${qRestAPI_SOURCE_DIR} ${qRestAPI_BINARY_DIR})
+include_directories(${qRestAPI_INCLUDE_DIRS})
 
 configure_file(
   qRestAPI_Export.h.in

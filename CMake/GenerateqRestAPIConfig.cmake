@@ -4,7 +4,7 @@ configure_file(
   ${qRestAPI_BINARY_DIR}/UseqRestAPI.cmake COPYONLY)
 
 # Include directories
-set(qRestAPI_INCLUDE_DIRS_CONFIG ${qRestAPI_SOURCE_DIR})
+set(qRestAPI_INCLUDE_DIRS_CONFIG ${qRestAPI_INCLUDE_DIRS})
 
 # UseqRestAPI file
 set(qRestAPI_USE_FILE_CONFIG ${qRestAPI_BINARY_DIR}/UseqRestAPI.cmake)
