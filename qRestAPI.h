@@ -196,6 +196,9 @@ public:
   /// Mostly for debug purpose.
   static QString qVariantMapListToString(const QList<QVariantMap>& variants);
 
+  static QVariantMap scriptValueToMap(const QScriptValue& value);
+  static void appendScriptValueToVariantMapList(QList<QVariantMap>& result, const QScriptValue& value);
+
 signals:
   void finished(const QUuid& queryId);
   void progress(const QUuid& queryId, double progress);
@@ -209,9 +212,6 @@ protected:
   virtual void parseResponse(qRestResult* restResult, const QByteArray& response);
 
   static QString qVariantMapToString(const QList<QVariantMap>& result);
-  static QVariantMap scriptValueToMap(const QScriptValue& value);
-  static void appendScriptValueToVariantMapList(QList<QVariantMap>& result, const QScriptValue& value);
-
 private:
   QScopedPointer<qRestAPIPrivate> d_ptr;
 
