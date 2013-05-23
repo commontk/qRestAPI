@@ -186,8 +186,6 @@ void qRestAPIPrivate::processReply(QNetworkReply* reply)
 #ifndef QT_NO_OPENSSL
 void qRestAPIPrivate::onSslErrors(QNetworkReply* reply, const QList<QSslError>& errors)
 {
-  Q_Q(qRestAPI);
-
   if (!this->SuppressSslErrors)
     {
     QString errorString;
@@ -218,7 +216,6 @@ void qRestAPIPrivate::onSslErrors(QNetworkReply* reply, const QList<QSslError>& 
 // --------------------------------------------------------------------------
 void qRestAPIPrivate::queryProgress(qint64 bytesTransmitted, qint64 bytesTotal)
 {
-  Q_Q(qRestAPI);
   QNetworkReply* reply = qobject_cast<QNetworkReply*>(this->sender());
   // We received some progress so we postpone the timeout if any.
   QTimer* timer = reply->findChild<QTimer*>();
@@ -256,7 +253,6 @@ void qRestAPIPrivate::uploadProgress(qint64 bytesSent, qint64 bytesTotal)
 // --------------------------------------------------------------------------
 void qRestAPIPrivate::queryTimeOut()
 {
-  Q_Q(qRestAPI);
   QTimer* timer = qobject_cast<QTimer*>(this->sender());
   Q_ASSERT(timer);
   QNetworkReply* reply = qobject_cast<QNetworkReply*>(timer->parent());
@@ -361,7 +357,6 @@ void qRestAPI::parseResponse(qRestResult* restResult, const QByteArray& response
 // --------------------------------------------------------------------------
 QUuid qRestAPI::get(const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders)
 {
-  Q_D(qRestAPI);
   QUrl url = createUrl(resource, parameters);
   QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::GetOperation, url, rawHeaders);
   QUuid queryId = queryReply->property("uuid").toString();
@@ -401,8 +396,6 @@ QUuid qRestAPI::get(QIODevice* output, const QString& resource, const Parameters
 // --------------------------------------------------------------------------
 QUuid qRestAPI::download(const QString& fileName, const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders)
 {
-  Q_D(qRestAPI);
-
   QIODevice* output = new QFile(fileName);
 
   QUuid queryId = get(output, resource, parameters);
@@ -413,7 +406,6 @@ QUuid qRestAPI::download(const QString& fileName, const QString& resource, const
 // --------------------------------------------------------------------------
 QUuid qRestAPI::del(const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders)
 {
-  Q_D(qRestAPI);
   QUrl url = createUrl(resource, parameters);
   QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::DeleteOperation, url, rawHeaders);
   QUuid queryId = queryReply->property("uuid").toString();
@@ -423,7 +415,6 @@ QUuid qRestAPI::del(const QString& resource, const Parameters& parameters, const
 // --------------------------------------------------------------------------
 QUuid qRestAPI::post(const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders)
 {
-  Q_D(qRestAPI);
   QUrl url = createUrl(resource, parameters);
   QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::PostOperation, url, rawHeaders);
   QUuid queryId = queryReply->property("uuid").toString();
@@ -433,7 +424,6 @@ QUuid qRestAPI::post(const QString& resource, const Parameters& parameters, cons
 // --------------------------------------------------------------------------
 QUuid qRestAPI::put(const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders)
 {
-  Q_D(qRestAPI);
   QUrl url = createUrl(resource, parameters);
   QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::PutOperation, url, rawHeaders);
   QUuid queryId = queryReply->property("uuid").toString();

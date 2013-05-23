@@ -42,8 +42,6 @@ QList<QVariantMap> qXnatAPIPrivate::parseXmlResponse(qRestResult* restResult, co
 // --------------------------------------------------------------------------
 QList<QVariantMap> qXnatAPIPrivate::parseJsonResponse(qRestResult* restResult, const QByteArray& response)
 {
-  Q_Q(qXnatAPI);
-
   QScriptValue scriptValue = this->ScriptEngine.evaluate("(" + QString(response) + ")");
 
   QList<QVariantMap> result;
@@ -97,7 +95,6 @@ qXnatAPI::~qXnatAPI()
 // --------------------------------------------------------------------------
 QUuid qXnatAPI::get(const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders)
 {
-  Q_D(qXnatAPI);
   QUrl url = this->createUrl(resource, parameters);
   url.addQueryItem("format", "json");
   QNetworkReply* queryReply = this->sendRequest(QNetworkAccessManager::GetOperation, url, rawHeaders);

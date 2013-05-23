@@ -124,7 +124,6 @@ QList<QVariantMap> qMidasAPI::synchronousQuery(
 // --------------------------------------------------------------------------
 QUrl qMidasAPI::createUrl(const QString& method, const qRestAPI::Parameters& parameters)
 {
-  Q_D(qMidasAPI);
   QString responseType = "json";
   QUrl url = Superclass::createUrl("/api/" + responseType, parameters);
   if (!method.isEmpty())
