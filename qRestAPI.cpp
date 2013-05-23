@@ -80,36 +80,36 @@ QNetworkReply* qRestAPI::sendRequest(QNetworkAccessManager::Operation operation,
   queryRequest.setUrl(url);
 
   for (QMapIterator<QByteArray, QByteArray> it(d->DefaultRawHeaders); it.hasNext();)
-  {
+    {
     it.next();
     queryRequest.setRawHeader(it.key(), it.value());
-  }
+    }
 
   for (QMapIterator<QByteArray, QByteArray> it(rawHeaders); it.hasNext();)
-  {
+    {
     it.next();
     queryRequest.setRawHeader(it.key(), it.value());
-  }
+    }
 
   QNetworkReply* queryReply;
   switch (operation)
-  {
-  case QNetworkAccessManager::GetOperation:
-    queryReply = d->NetworkManager->get(queryRequest);
-    break;
-  case QNetworkAccessManager::DeleteOperation:
-    queryReply = d->NetworkManager->deleteResource(queryRequest);
-    break;
-  case QNetworkAccessManager::PutOperation:
-    queryReply = d->NetworkManager->put(queryRequest, QByteArray());
-    break;
-  case QNetworkAccessManager::PostOperation:
-    queryReply = d->NetworkManager->post(queryRequest, QByteArray());
-    break;
-  default:
-    // TODO
-    return 0;
-  }
+    {
+    case QNetworkAccessManager::GetOperation:
+      queryReply = d->NetworkManager->get(queryRequest);
+      break;
+    case QNetworkAccessManager::DeleteOperation:
+      queryReply = d->NetworkManager->deleteResource(queryRequest);
+      break;
+    case QNetworkAccessManager::PutOperation:
+      queryReply = d->NetworkManager->put(queryRequest, QByteArray());
+      break;
+    case QNetworkAccessManager::PostOperation:
+      queryReply = d->NetworkManager->post(queryRequest, QByteArray());
+      break;
+    default:
+      // TODO
+      return 0;
+    }
 
   if (d->TimeOut > 0)
     {
@@ -189,16 +189,16 @@ void qRestAPIPrivate::onSslErrors(QNetworkReply* reply, const QList<QSslError>& 
   Q_Q(qRestAPI);
 
   if (!this->SuppressSslErrors)
-  {
+    {
     QString errorString;
     foreach (const QSslError& error, errors)
-    {
-      if (!errorString.isEmpty())
       {
+      if (!errorString.isEmpty())
+        {
         errorString.append(", ");
-      }
+        }
       errorString.append(error.errorString());
-    }
+      }
 
     QString plural(errors.empty() ? " has" : "s have");
     QString error = QString("SSL error%1 occurred: %2").arg(plural).arg(errorString);
@@ -207,11 +207,11 @@ void qRestAPIPrivate::onSslErrors(QNetworkReply* reply, const QList<QSslError>& 
     qRestResult* restResult = results[queryId];
 
     restResult->setError(error);
-  }
+    }
   else
-  {
+    {
     reply->ignoreSslErrors();
-  }
+    }
 }
 #endif
 
@@ -482,11 +482,11 @@ bool qRestAPI::sync(const QUuid& queryId)
 {
   Q_D(qRestAPI);
   if (d->results.contains(queryId))
-  {
+    {
     d->results[queryId]->waitForDone();
     qRestResult* queryResult = d->results.take(queryId);
     return queryResult->Error.isNull();
-  }
+    }
   return false;
 }
 
@@ -495,7 +495,7 @@ bool qRestAPI::sync(const QUuid& queryId, QList<QVariantMap>& result)
   Q_D(qRestAPI);
   result.clear();
   if (d->results.contains(queryId))
-  {
+    {
     d->results[queryId]->waitForDone();
     qRestResult* queryResult = d->results.take(queryId);
     bool ok = queryResult->Error.isNull();
@@ -507,7 +507,7 @@ bool qRestAPI::sync(const QUuid& queryId, QList<QVariantMap>& result)
       }
     result = queryResult->Result;
     return ok;
-  }
+    }
   return false;
 }
 

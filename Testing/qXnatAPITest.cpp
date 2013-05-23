@@ -128,12 +128,12 @@ void qXnatAPITestCase::testProject()
 
   // Query project:
   if (d->xnat->sync(d->xnat->get(projectRequest)))
-  {
+    {
     // Delete project:
     QVERIFY(d->xnat->sync(d->xnat->del(projectRequest)));
     // Query project (expected not to exist):
     QVERIFY(!d->xnat->sync(d->xnat->get(projectRequest)));
-  }
+    }
 
   // Create project:
   qDebug() << "CREATE PROJECT";
@@ -253,9 +253,9 @@ void qXnatAPITestCase::testDownloadScans()
   QString fileName = "testFile.zip";
   QFile testFile(fileName);
   if (testFile.exists())
-  {
+    {
     testFile.remove();
-  }
+    }
   QVERIFY(!testFile.exists());
 
   QString downloadQuery = QString("/REST/projects/%1/subjects/%2/experiments/%3/scans/ALL/files").arg(projectName, subjectName, experimentName);
@@ -272,9 +272,9 @@ void qXnatAPITestCase::testDownloadScans()
   QVERIFY(testFile.exists());
   QCOMPARE(testFile.size(), expectedSize);
   if (testFile.exists())
-  {
+    {
     testFile.remove();
-  }
+    }
   QVERIFY(!testFile.exists());
 }
 

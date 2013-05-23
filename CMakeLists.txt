@@ -58,4 +58,3 @@ if(BUILD_TESTING)
 endif()
 
 include(CMake/GenerateqRestAPIConfig.cmake)
-

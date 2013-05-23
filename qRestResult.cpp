@@ -95,13 +95,13 @@ void qRestResult::setError(const QString& error)
 void qRestResult::waitForDone()
 {
   if (!done)
-  {
+    {
     QEventLoop eventLoop;
     // Time out will fire an error which will quit the event loop.
     QObject::connect(this, SIGNAL(ready()),
                      &eventLoop, SLOT(quit()));
     eventLoop.exec();
-  }
+    }
 }
 
 // --------------------------------------------------------------------------
@@ -141,13 +141,13 @@ QVariantMap qRestResult::qObjectToPropertyMap(QObject* object)
   const QMetaObject* metaobject = object->metaObject();
   int propertyCount = metaobject->propertyCount();
   for (int i = 0; i < propertyCount; ++i)
-  {
+    {
     QMetaProperty metaProperty = metaobject->property(i);
     propertyMap[metaProperty.name()] = metaProperty.read(object);
-  }
+    }
   foreach (QByteArray dynamicPropertyName, object->dynamicPropertyNames())
-  {
+    {
     propertyMap[dynamicPropertyName] = object->property(dynamicPropertyName);
-  }
+    }
   return propertyMap;
 }
