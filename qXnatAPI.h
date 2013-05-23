@@ -35,6 +35,8 @@ public:
   explicit qXnatAPI(QObject*parent = 0);
   virtual ~qXnatAPI();
 
+  using Superclass::get;
+
   virtual QUuid get(const QString& resource,
     const Parameters& parameters = Parameters(),
     const RawHeaders& rawHeaders = RawHeaders());
