@@ -6,6 +6,9 @@ configure_file(
 # Include directories
 set(qRestAPI_INCLUDE_DIRS_CONFIG ${qRestAPI_INCLUDE_DIRS})
 
+# Library directories
+set(qRestAPI_LIBRARY_DIRS_CONFIG ${qRestAPI_BINARY_DIR})
+
 # UseqRestAPI file
 set(qRestAPI_USE_FILE_CONFIG ${qRestAPI_BINARY_DIR}/UseqRestAPI.cmake)
 

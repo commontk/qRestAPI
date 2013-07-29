@@ -6,8 +6,11 @@
 
 if(NOT qRestAPI_USE_FILE_INCLUDED)
   set(qRestAPI_USE_FILE_INCLUDED 1)
-  
+
   # Add include directories needed to use qRestAPI.
   include_directories(${qRestAPI_INCLUDE_DIRS})
-  
+
+  # Add link directories needed to use qRestAPI.
+  link_directories(${qRestAPI_LIBRARY_DIRS})
+
 endif()
