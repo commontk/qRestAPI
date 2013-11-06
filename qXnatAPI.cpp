@@ -52,11 +52,7 @@ QList<QVariantMap> qXnatAPIPrivate::parseJsonResponse(qRestResult* restResult, c
   QScriptValue data = resultSet.property("Result");
   if (!data.isObject())
     {
-    if (data.toString().isEmpty())
-      {
-      restResult->setError("No data");
-      }
-    else
+    if (!data.toString().isEmpty())
       {
       restResult->setError(QString("Bad data: ") + data.toString());
       }
