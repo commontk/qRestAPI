@@ -519,9 +519,12 @@ QString qRestAPI::qVariantMapListToString(const QList<QVariantMap>& list)
 qRestResult* qRestAPI::takeResult(const QUuid& queryId)
 {
   Q_D(qRestAPI);
-  d->results[queryId]->waitForDone();
-  qRestResult* result = d->results.take(queryId);
-  return result;
+  if (d->results.contains(queryId))
+  {
+    d->results[queryId]->waitForDone();
+    return d->results.take(queryId);
+  }
+  return 0;
 }
 
 //// --------------------------------------------------------------------------
