@@ -45,8 +45,7 @@ class qRestResult;
 /// The class should be adopted to specific web services by subclassing. The
 /// derived class should define how to construct the requests and how to
 /// interpret the responses.
-/// The library provides a sample implementation to interact with Midas and
-/// XNAT servers.
+/// The library provides a sample implementation to interact with Midas servers.
 /// Usage:
 /// <code>
 /// qRestAPI* midas = new qMidasAPI();

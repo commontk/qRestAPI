@@ -1,7 +1,7 @@
 # OVERVIEW
 
 qRestAPI is a cross-platform [Qt-based](http://doc.qt.nokia.com/4.7/qt4-7-intro.html) library 
-allowing to easily query a [Midas](http://midas.kitware.com) or [XNAT](http://xnat.org) server.
+allowing to easily query a [Midas](http://midas.kitware.com) server.
 
 ## Prerequisites
 

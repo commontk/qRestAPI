@@ -26,9 +26,6 @@ set(KIT_SRCS
   qRestAPI_p.h
   qRestResult.cpp
   qRestResult.h
-  qXnatAPI.cpp
-  qXnatAPI.h
-  qXnatAPI_p.h
   )
 
 set(KIT_MOC_SRCS
@@ -37,8 +34,6 @@ set(KIT_MOC_SRCS
   qRestAPI.h
   qRestAPI_p.h
   qRestResult.h
-  qXnatAPI.h
-  qXnatAPI_p.h
   )
 
 QT4_WRAP_CPP(KIT_MOC_OUTPUT ${KIT_MOC_SRCS})
