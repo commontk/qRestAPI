@@ -39,6 +39,7 @@ class qRestAPI_EXPORT qRestResult : public QObject
   QUuid QueryId;
   QList<QVariantMap> Result;
   QString Error;
+  qRestAPI::ErrorType ErrorCode;
 
   bool done;
   QIODevice* ioDevice;
@@ -49,11 +50,12 @@ public:
 
   const QUuid& queryId() const;
 
-  void waitForDone();
+  bool waitForDone();
 
   const QList<QVariantMap>& results() const;
   const QVariantMap result() const;
   const QString& error() const;
+  qRestAPI::ErrorType errorType() const;
 
   template <class Q>
   QList<Q*> results() const;
@@ -64,7 +66,7 @@ public:
 public slots:
   void setResult();
   void setResult(const QList<QVariantMap>& result);
-  void setError(const QString& error);
+  void setError(qRestAPI::ErrorType errorType, const QString& error);
 
   void downloadReadyRead();
   void downloadFinished();
