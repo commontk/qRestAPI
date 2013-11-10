@@ -76,6 +76,22 @@ class qRestAPI_EXPORT qRestAPI : public QObject
   typedef QObject Superclass;
 
 public:
+
+  enum ErrorType
+  {
+    UnknownError = -1,
+    /// An unknown uuid was used
+    UnknownUuidError = 1,
+    /// A time-out error
+    TimeoutError = 2,
+    /// Error related to SSL connections
+    SslError = 3,
+    /// Error parsing the response
+    ResponseParseError = 4,
+    /// General network error not covered by more specific error types
+    NetworkError = 5
+  };
+
   /// Constructs a qRestAPI object.
   explicit qRestAPI(QObject*parent = 0);
   /// Destructs a qRestAPI object.
@@ -186,10 +202,31 @@ public:
     const Parameters& parameters = Parameters(),
     const RawHeaders& rawHeaders = RawHeaders());
 
+  /// Blocks until the result for the uuid \a queryId is available.
+  /// Returns false if an error occured.
+  /// \sa ErrorType
+  /// \sa error()
+  /// \sa errorString()
   bool sync(const QUuid& queryId);
+
+  /// Blocks until the results for the uuid \a queryId is available and
+  /// stores the results in the given \a result parameter.
+  /// Returns false if an error occured.
+  /// \sa ErrorType
+  /// \sa error()
+  /// \sa errorString()
   bool sync(const QUuid& queryId, QList<QVariantMap>& result);
 
+  /// Get a qRestResult object for the specified QUuid.
+  /// If the \a queryId parameter is unknown, this function
+  /// returns NULL and sets the error state to ErrorType::UnknownUuid.
   qRestResult* takeResult(const QUuid& queryId);
+
+  /// Get the error code for the last error which occured.
+  ErrorType error() const;
+
+  /// Get the error description for the last error which occured.
+  QString errorString() const;
 
   /// Utility function that transforms a QList of QVariantMap into a string.
   /// Mostly for debug purpose.

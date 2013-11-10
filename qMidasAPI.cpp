@@ -149,7 +149,7 @@ void qMidasAPI::parseResponse(qRestResult* restResult, const QByteArray& respons
       " status: " + scriptValue.property("stat").toString() +
       " code: " + scriptValue.property("code").toInteger() +
       " msg: " + scriptValue.property("message").toString();
-    restResult->setError(error);
+    restResult->setError(error, ResponseParseError);
     emit errorReceived(queryId, error);
     }
   QScriptValue data = scriptValue.property("data");
@@ -157,12 +157,12 @@ void qMidasAPI::parseResponse(qRestResult* restResult, const QByteArray& respons
     {
     if (data.toString().isEmpty())
       {
-      restResult->setError("No data");
+      restResult->setError("No data", ResponseParseError);
       emit errorReceived(queryId, "No data");
       }
     else
       {
-      restResult->setError(QString("Bad data: ") + data.toString());
+      restResult->setError(QString("Bad data: ") + data.toString(), ResponseParseError);
       emit errorReceived(queryId, QString("Bad data: ") + data.toString());
       }
     }
