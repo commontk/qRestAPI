@@ -512,6 +512,7 @@ bool qRestAPI::sync(const QUuid& queryId, QList<QVariantMap>& result)
       d->ErrorString = queryResult->error();
       }
     result = queryResult->Result;
+    delete queryResult;
     return ok;
     }
   d->ErrorCode = UnknownUuidError;
@@ -549,6 +550,7 @@ qRestResult* qRestAPI::takeResult(const QUuid& queryId)
       {
       d->ErrorCode = result->errorType();
       d->ErrorString = result->error();
+      delete result;
       return NULL;
       }
     }
