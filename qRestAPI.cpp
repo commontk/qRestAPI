@@ -501,11 +501,10 @@ bool qRestAPI::sync(const QUuid& queryId, QList<QVariantMap>& result)
   result.clear();
   if (d->results.contains(queryId))
     {
+    bool ok = d->results[queryId]->waitForDone();
     qRestResult* queryResult = d->results.take(queryId);
-    bool ok = true;
-    if (!queryResult->waitForDone())
+    if (!ok)
       {
-      ok = false;
       QVariantMap map;
       map["queryError"] = queryResult->Error;
       queryResult->Result.push_front(map);
@@ -540,8 +539,9 @@ qRestResult* qRestAPI::takeResult(const QUuid& queryId)
   Q_D(qRestAPI);
   if (d->results.contains(queryId))
     {
+    bool ok = d->results[queryId]->waitForDone();
     qRestResult* result = d->results.take(queryId);
-    if (result->waitForDone())
+    if (ok)
       {
       return result;
       }
