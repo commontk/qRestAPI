@@ -112,7 +112,7 @@ bool qRestResult::waitForDone()
     }
   // We require that the error code in case of an actual error is
   // never UnknownError for qRestResult objects.
-  return this->ErrorCode != qRestAPI::UnknownError;
+  return this->ErrorCode == qRestAPI::UnknownError;
 }
 
 // --------------------------------------------------------------------------
