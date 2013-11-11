@@ -85,6 +85,9 @@ public:
   qRestAPI::RawHeaders DefaultRawHeaders;
   bool SuppressSslErrors;
 
+  qRestAPI::ErrorType ErrorCode;
+  QString ErrorString;
+
 // In Qt5 QHash should be used. QUuid does not have a hash function in Qt4,
 // so the QUuid's would be converted to QString what is expensive.
 #if QT_VERSION >= 0x050000

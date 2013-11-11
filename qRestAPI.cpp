@@ -34,6 +34,12 @@
 #include "qRestResult.h"
 
 // --------------------------------------------------------------------------
+// Static file local error messages
+static QString unknownErrorStr = "Unknown error";
+static QString unknownUuidStr = "Unknown uuid %1";
+static QString timeoutErrorStr = "Request timed out";
+
+// --------------------------------------------------------------------------
 // qRestAPIPrivate methods
 
 qRestAPIPrivate::StaticInit qRestAPIPrivate::_staticInit;
@@ -41,10 +47,12 @@ qRestAPIPrivate::StaticInit qRestAPIPrivate::_staticInit;
 // --------------------------------------------------------------------------
 qRestAPIPrivate::qRestAPIPrivate(qRestAPI* object)
   : q_ptr(object)
+  , NetworkManager(NULL)
+  , TimeOut(0)
+  , SuppressSslErrors(true)
+  , ErrorCode(qRestAPI::UnknownError)
+  , ErrorString(unknownErrorStr)
 {
-  this->NetworkManager = 0;
-  this->TimeOut = 0;
-  this->SuppressSslErrors = true;
 }
 
 // --------------------------------------------------------------------------
@@ -173,9 +181,22 @@ void qRestAPIPrivate::processReply(QNetworkReply* reply)
 
   if (reply->error() != QNetworkReply::NoError)
     {
+    qRestAPI::ErrorType errorCode = qRestAPI::NetworkError;
+    switch (reply->error())
+      {
+    case QNetworkReply::TimeoutError:
+      errorCode = qRestAPI::NetworkError;
+      break;
+    case QNetworkReply::SslHandshakeFailedError:
+      errorCode = qRestAPI::SslError;
+      break;
+    default:
+      ;
+      }
     restResult->setError(queryId.toString() + ": "  +
-                  reply->error() + ": " +
-                  reply->errorString());
+                         reply->error() + ": " +
+                         reply->errorString(),
+                         errorCode);
     }
   QByteArray response = reply->readAll();
   q->parseResponse(restResult, response);
@@ -204,7 +225,7 @@ void qRestAPIPrivate::onSslErrors(QNetworkReply* reply, const QList<QSslError>& 
     QUuid queryId(reply->property("uuid").toString());
     qRestResult* restResult = results[queryId];
 
-    restResult->setError(error);
+    restResult->setError(error, qRestAPI::SslError);
     }
   else
     {
@@ -470,14 +491,8 @@ QUuid qRestAPI::upload(const QString& fileName, const QString& resource, const P
 
 bool qRestAPI::sync(const QUuid& queryId)
 {
-  Q_D(qRestAPI);
-  if (d->results.contains(queryId))
-    {
-    d->results[queryId]->waitForDone();
-    qRestResult* queryResult = d->results.take(queryId);
-    return queryResult->Error.isNull();
-    }
-  return false;
+  QList<QVariantMap> result;
+  return this->sync(queryId, result);
 }
 
 bool qRestAPI::sync(const QUuid& queryId, QList<QVariantMap>& result)
@@ -486,18 +501,22 @@ bool qRestAPI::sync(const QUuid& queryId, QList<QVariantMap>& result)
   result.clear();
   if (d->results.contains(queryId))
     {
-    d->results[queryId]->waitForDone();
+    bool ok = d->results[queryId]->waitForDone();
     qRestResult* queryResult = d->results.take(queryId);
-    bool ok = queryResult->Error.isNull();
     if (!ok)
       {
       QVariantMap map;
       map["queryError"] = queryResult->Error;
       queryResult->Result.push_front(map);
+      d->ErrorCode = queryResult->errorType();
+      d->ErrorString = queryResult->error();
       }
     result = queryResult->Result;
+    delete queryResult;
     return ok;
     }
+  d->ErrorCode = UnknownUuidError;
+  d->ErrorString = unknownUuidStr.arg(queryId);
   return false;
 }
 
@@ -520,11 +539,38 @@ qRestResult* qRestAPI::takeResult(const QUuid& queryId)
 {
   Q_D(qRestAPI);
   if (d->results.contains(queryId))
-  {
-    d->results[queryId]->waitForDone();
-    return d->results.take(queryId);
-  }
-  return 0;
+    {
+    bool ok = d->results[queryId]->waitForDone();
+    qRestResult* result = d->results.take(queryId);
+    if (ok)
+      {
+      return result;
+      }
+    else
+      {
+      d->ErrorCode = result->errorType();
+      d->ErrorString = result->error();
+      delete result;
+      return NULL;
+      }
+    }
+  d->ErrorCode = UnknownUuidError;
+  d->ErrorString = UnknownUuidError;
+  return NULL;
+}
+
+// --------------------------------------------------------------------------
+qRestAPI::ErrorType qRestAPI::error() const
+{
+  Q_D(const qRestAPI);
+  return d->ErrorCode;
+}
+
+// --------------------------------------------------------------------------
+QString qRestAPI::errorString() const
+{
+  Q_D(const qRestAPI);
+  return d->ErrorString;
 }
 
 //// --------------------------------------------------------------------------

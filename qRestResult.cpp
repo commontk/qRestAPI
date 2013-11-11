@@ -32,6 +32,7 @@
 qRestResult::qRestResult(const QUuid& queryId, QObject* parent)
   : QObject(parent)
   , QueryId(queryId)
+  , ErrorCode(qRestAPI::UnknownError)
   , done(false)
 {
 }
@@ -66,6 +67,12 @@ const QString& qRestResult::error() const
 }
 
 // --------------------------------------------------------------------------
+qRestAPI::ErrorType qRestResult::errorType() const
+{
+  return this->ErrorCode;
+}
+
+// --------------------------------------------------------------------------
 void qRestResult::setResult()
 {
   this->done = true;
@@ -84,15 +91,16 @@ void qRestResult::setResult(const QList<QVariantMap>& result)
 }
 
 // --------------------------------------------------------------------------
-void qRestResult::setError(const QString& error)
+void qRestResult::setError(const QString& error, qRestAPI::ErrorType errorType)
 {
+  this->ErrorCode = errorType;
   this->Error = error;
   this->done = true;
   emit ready();
 }
 
 // --------------------------------------------------------------------------
-void qRestResult::waitForDone()
+bool qRestResult::waitForDone()
 {
   if (!done)
     {
@@ -102,6 +110,9 @@ void qRestResult::waitForDone()
                      &eventLoop, SLOT(quit()));
     eventLoop.exec();
     }
+  // We require that the error code in case of an actual error is
+  // never UnknownError for qRestResult objects.
+  return this->ErrorCode == qRestAPI::UnknownError;
 }
 
 // --------------------------------------------------------------------------
