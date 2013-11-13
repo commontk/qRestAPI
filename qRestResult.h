@@ -66,7 +66,13 @@ public:
   QList<Q*> results() const;
 
   template <class Q>
+  QList<Q*> results(const QString& typeName) const;
+
+  template <class Q>
   Q* result() const;
+
+  template <class Q>
+  Q* result(const QString& typeName) const;
 
 public slots:
   void setResult();
@@ -88,6 +94,8 @@ private:
   static QVariantMap qObjectToPropertyMap(QObject* object);
   template <class Q>
   static Q* propertyMapToQObject(QVariantMap propertyMap);
+  template <class Q>
+  static Q* propertyMapToMetaType(QVariantMap propertyMap, const QString& typeName);
 };
 
 // --------------------------------------------------------------------------
@@ -96,6 +104,15 @@ Q* qRestResult::result() const
 {
   QVariantMap propertyMap = this->Result[0];
   Q* object = qRestResult::propertyMapToQObject<Q>(propertyMap);
+  return object;
+}
+
+// --------------------------------------------------------------------------
+template <class Q>
+Q* qRestResult::result(const QString& typeName) const
+{
+  QVariantMap propertyMap = this->Result[0];
+  Q* object = qRestResult::propertyMapToMetaType<Q>(propertyMap);
   return object;
 }
 
@@ -113,9 +130,36 @@ QList<Q*> qRestResult::results() const
 
 // --------------------------------------------------------------------------
 template <class Q>
+QList<Q*> qRestResult::results(const QString& typeName) const
+{
+  QList<Q*> results;
+  foreach (QVariantMap propertyMap, this->Result)
+  {
+    results.push_back(propertyMapToMetaType<Q>(propertyMap, typeName));
+  }
+  return results;
+}
+
+// --------------------------------------------------------------------------
+template <class Q>
 Q* qRestResult::propertyMapToQObject(QVariantMap propertyMap)
 {
   Q* object = new Q();
+  QMapIterator<QString, QVariant> it(propertyMap);
+  while (it.hasNext())
+  {
+    it.next();
+    object->setProperty(it.key().toAscii().data(), it.value());
+  }
+  return object;
+}
+
+// --------------------------------------------------------------------------
+template <class Q>
+Q* qRestResult::propertyMapToMetaType(QVariantMap propertyMap, const QString& typeName)
+{
+  int typeId = QMetaType::type(qPrintable(typeName));
+  Q* object = reinterpret_cast<Q*>(QMetaType::construct(typeId));
   QMapIterator<QString, QVariant> it(propertyMap);
   while (it.hasNext())
   {
