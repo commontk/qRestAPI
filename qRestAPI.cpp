@@ -197,7 +197,7 @@ void qRestAPIPrivate::processReply(QNetworkReply* reply)
       ;
       }
     restResult->setError(queryId.toString() + ": "  +
-                         reply->error() + ": " +
+                         QString::number(static_cast<int>(reply->error())) + ": " +
                          reply->errorString(),
                          errorCode);
     }
