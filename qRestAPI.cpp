@@ -201,8 +201,12 @@ void qRestAPIPrivate::processReply(QNetworkReply* reply)
                          reply->errorString(),
                          errorCode);
     }
-  QByteArray response = reply->readAll();
-  q->parseResponse(restResult, response);
+  else
+    {
+    QByteArray response = reply->readAll();
+    q->parseResponse(restResult, response);
+    }
+
   reply->close();
   reply->deleteLater();
 }
