@@ -185,7 +185,7 @@ void qRestAPIPrivate::processReply(QNetworkReply* reply)
     switch (reply->error())
       {
     case QNetworkReply::TimeoutError:
-      errorCode = qRestAPI::NetworkError;
+      errorCode = qRestAPI::TimeoutError;
       break;
     case QNetworkReply::SslHandshakeFailedError:
       errorCode = qRestAPI::SslError;
