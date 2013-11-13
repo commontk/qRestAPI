@@ -190,6 +190,9 @@ void qRestAPIPrivate::processReply(QNetworkReply* reply)
     case QNetworkReply::SslHandshakeFailedError:
       errorCode = qRestAPI::SslError;
       break;
+    case QNetworkReply::AuthenticationRequiredError:
+      errorCode = qRestAPI::AuthenticationError;
+      break;
     default:
       ;
       }
