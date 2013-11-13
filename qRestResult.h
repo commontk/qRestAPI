@@ -41,6 +41,8 @@ class qRestAPI_EXPORT qRestResult : public QObject
   QString Error;
   qRestAPI::ErrorType ErrorCode;
 
+  QMap<QByteArray, QByteArray> RawHeaders;
+
   bool done;
   QIODevice* ioDevice;
 
@@ -56,6 +58,9 @@ public:
   const QVariantMap result() const;
   const QString& error() const;
   qRestAPI::ErrorType errorType() const;
+
+  QByteArray rawHeader(const QByteArray& name) const;
+  QMap<QByteArray, QByteArray> rawHeaders() const;
 
   template <class Q>
   QList<Q*> results() const;
@@ -77,6 +82,9 @@ signals:
   void ready();
 
 private:
+
+  void setRawHeader(const QByteArray& name, const QByteArray& value);
+
   static QVariantMap qObjectToPropertyMap(QObject* object);
   template <class Q>
   static Q* propertyMapToQObject(QVariantMap propertyMap);

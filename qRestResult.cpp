@@ -73,6 +73,22 @@ qRestAPI::ErrorType qRestResult::errorType() const
 }
 
 // --------------------------------------------------------------------------
+QByteArray qRestResult::rawHeader(const QByteArray& name) const
+{
+  if (this->RawHeaders.contains(name))
+  {
+    return this->RawHeaders[name];
+  }
+  return QByteArray();
+}
+
+// --------------------------------------------------------------------------
+QMap<QByteArray, QByteArray> qRestResult::rawHeaders() const
+{
+  return this->RawHeaders;
+}
+
+// --------------------------------------------------------------------------
 void qRestResult::setResult()
 {
   this->done = true;
@@ -146,6 +162,13 @@ void qRestResult::uploadFinished()
   ioDevice->close();
 }
 
+// --------------------------------------------------------------------------
+void qRestResult::setRawHeader(const QByteArray& name, const QByteArray& value)
+{
+  this->RawHeaders[name] = value;
+}
+
+// --------------------------------------------------------------------------
 QVariantMap qRestResult::qObjectToPropertyMap(QObject* object)
 {
   QVariantMap propertyMap;

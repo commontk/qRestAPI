@@ -207,6 +207,11 @@ void qRestAPIPrivate::processReply(QNetworkReply* reply)
     q->parseResponse(restResult, response);
     }
 
+  foreach(const QNetworkReply::RawHeaderPair& rawHeaderPair, reply->rawHeaderPairs())
+    {
+    restResult->setRawHeader(rawHeaderPair.first, rawHeaderPair.second);
+    }
+
   reply->close();
   reply->deleteLater();
 }
