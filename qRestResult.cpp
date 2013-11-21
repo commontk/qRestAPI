@@ -167,21 +167,3 @@ void qRestResult::setRawHeader(const QByteArray& name, const QByteArray& value)
 {
   this->RawHeaders[name] = value;
 }
-
-// --------------------------------------------------------------------------
-QVariantMap qRestResult::qObjectToPropertyMap(QObject* object)
-{
-  QVariantMap propertyMap;
-  const QMetaObject* metaobject = object->metaObject();
-  int propertyCount = metaobject->propertyCount();
-  for (int i = 0; i < propertyCount; ++i)
-    {
-    QMetaProperty metaProperty = metaobject->property(i);
-    propertyMap[metaProperty.name()] = metaProperty.read(object);
-    }
-  foreach (QByteArray dynamicPropertyName, object->dynamicPropertyNames())
-    {
-    propertyMap[dynamicPropertyName] = object->property(dynamicPropertyName);
-    }
-  return propertyMap;
-}
