@@ -62,18 +62,6 @@ public:
   QByteArray rawHeader(const QByteArray& name) const;
   QMap<QByteArray, QByteArray> rawHeaders() const;
 
-  template <class Q>
-  QList<Q*> results() const;
-
-  template <class Q>
-  QList<Q*> results(const QString& typeName) const;
-
-  template <class Q>
-  Q* result() const;
-
-  template <class Q>
-  Q* result(const QString& typeName) const;
-
 public slots:
   void setResult();
   void setResult(const QList<QVariantMap>& result);
