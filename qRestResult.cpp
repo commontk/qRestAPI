@@ -73,6 +73,22 @@ qRestAPI::ErrorType qRestResult::errorType() const
 }
 
 // --------------------------------------------------------------------------
+QByteArray qRestResult::rawHeader(const QByteArray& name) const
+{
+  if (this->RawHeaders.contains(name))
+  {
+    return this->RawHeaders[name];
+  }
+  return QByteArray();
+}
+
+// --------------------------------------------------------------------------
+QMap<QByteArray, QByteArray> qRestResult::rawHeaders() const
+{
+  return this->RawHeaders;
+}
+
+// --------------------------------------------------------------------------
 void qRestResult::setResult()
 {
   this->done = true;
@@ -146,19 +162,8 @@ void qRestResult::uploadFinished()
   ioDevice->close();
 }
 
-QVariantMap qRestResult::qObjectToPropertyMap(QObject* object)
+// --------------------------------------------------------------------------
+void qRestResult::setRawHeader(const QByteArray& name, const QByteArray& value)
 {
-  QVariantMap propertyMap;
-  const QMetaObject* metaobject = object->metaObject();
-  int propertyCount = metaobject->propertyCount();
-  for (int i = 0; i < propertyCount; ++i)
-    {
-    QMetaProperty metaProperty = metaobject->property(i);
-    propertyMap[metaProperty.name()] = metaProperty.read(object);
-    }
-  foreach (QByteArray dynamicPropertyName, object->dynamicPropertyNames())
-    {
-    propertyMap[dynamicPropertyName] = object->property(dynamicPropertyName);
-    }
-  return propertyMap;
+  this->RawHeaders[name] = value;
 }

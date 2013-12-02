@@ -185,21 +185,33 @@ void qRestAPIPrivate::processReply(QNetworkReply* reply)
     switch (reply->error())
       {
     case QNetworkReply::TimeoutError:
-      errorCode = qRestAPI::NetworkError;
+      errorCode = qRestAPI::TimeoutError;
       break;
     case QNetworkReply::SslHandshakeFailedError:
       errorCode = qRestAPI::SslError;
+      break;
+    case QNetworkReply::AuthenticationRequiredError:
+      errorCode = qRestAPI::AuthenticationError;
       break;
     default:
       ;
       }
     restResult->setError(queryId.toString() + ": "  +
-                         reply->error() + ": " +
+                         QString::number(static_cast<int>(reply->error())) + ": " +
                          reply->errorString(),
                          errorCode);
     }
-  QByteArray response = reply->readAll();
-  q->parseResponse(restResult, response);
+  else
+    {
+    QByteArray response = reply->readAll();
+    q->parseResponse(restResult, response);
+    }
+
+  foreach(const QNetworkReply::RawHeaderPair& rawHeaderPair, reply->rawHeaderPairs())
+    {
+    restResult->setRawHeader(rawHeaderPair.first, rawHeaderPair.second);
+    }
+
   reply->close();
   reply->deleteLater();
 }

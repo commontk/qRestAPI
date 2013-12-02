@@ -41,6 +41,8 @@ class qRestAPI_EXPORT qRestResult : public QObject
   QString Error;
   qRestAPI::ErrorType ErrorCode;
 
+  QMap<QByteArray, QByteArray> RawHeaders;
+
   bool done;
   QIODevice* ioDevice;
 
@@ -57,11 +59,8 @@ public:
   const QString& error() const;
   qRestAPI::ErrorType errorType() const;
 
-  template <class Q>
-  QList<Q*> results() const;
-
-  template <class Q>
-  Q* result() const;
+  QByteArray rawHeader(const QByteArray& name) const;
+  QMap<QByteArray, QByteArray> rawHeaders() const;
 
 public slots:
   void setResult();
@@ -77,44 +76,9 @@ signals:
   void ready();
 
 private:
-  static QVariantMap qObjectToPropertyMap(QObject* object);
-  template <class Q>
-  static Q* propertyMapToQObject(QVariantMap propertyMap);
+
+  void setRawHeader(const QByteArray& name, const QByteArray& value);
+
 };
-
-// --------------------------------------------------------------------------
-template <class Q>
-Q* qRestResult::result() const
-{
-  QVariantMap propertyMap = this->Result[0];
-  Q* object = qRestResult::propertyMapToQObject<Q>(propertyMap);
-  return object;
-}
-
-// --------------------------------------------------------------------------
-template <class Q>
-QList<Q*> qRestResult::results() const
-{
-  QList<Q*> results;
-  foreach (QVariantMap propertyMap, this->Result)
-  {
-    results.push_back(propertyMapToQObject<Q>(propertyMap));
-  }
-  return results;
-}
-
-// --------------------------------------------------------------------------
-template <class Q>
-Q* qRestResult::propertyMapToQObject(QVariantMap propertyMap)
-{
-  Q* object = new Q();
-  QMapIterator<QString, QVariant> it(propertyMap);
-  while (it.hasNext())
-  {
-    it.next();
-    object->setProperty(it.key().toAscii().data(), it.value());
-  }
-  return object;
-}
 
 #endif

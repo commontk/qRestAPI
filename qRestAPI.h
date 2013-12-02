@@ -88,8 +88,11 @@ public:
     SslError = 3,
     /// Error parsing the response
     ResponseParseError = 4,
+    /// The remote server requires authentication but the credentials
+    /// provided were not accepted (if any).
+    AuthenticationError = 5,
     /// General network error not covered by more specific error types
-    NetworkError = 5
+    NetworkError = 100
   };
 
   /// Constructs a qRestAPI object.
