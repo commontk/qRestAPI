@@ -56,6 +56,12 @@ qRestAPIPrivate::qRestAPIPrivate(qRestAPI* object)
 }
 
 // --------------------------------------------------------------------------
+qRestAPIPrivate::~qRestAPIPrivate()
+{
+  NetworkManager->deleteLater();
+}
+
+// --------------------------------------------------------------------------
 void qRestAPIPrivate::staticInit()
 {
   qRegisterMetaType<QUuid>("QUuid");
@@ -65,8 +71,7 @@ void qRestAPIPrivate::staticInit()
 // --------------------------------------------------------------------------
 void qRestAPIPrivate::init()
 {
-  Q_Q(qRestAPI);
-  this->NetworkManager = new QNetworkAccessManager(q);
+  this->NetworkManager = new QNetworkAccessManager();
   QObject::connect(this->NetworkManager, SIGNAL(finished(QNetworkReply*)),
                    this, SLOT(processReply(QNetworkReply*)));
 #ifndef QT_NO_OPENSSL
