@@ -59,6 +59,7 @@ private:
 
 public:
   qRestAPIPrivate(qRestAPI* object);
+  ~qRestAPIPrivate();
 
   virtual void init();
 
