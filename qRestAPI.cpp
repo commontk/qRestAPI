@@ -26,6 +26,7 @@
 #include <QStringList>
 #include <QTimer>
 #include <QUuid>
+#include <QScriptValueIterator>
 
 // qRestAPI includes
 #include "qRestAPI.h"
@@ -212,10 +213,17 @@ void qRestAPIPrivate::processReply(QNetworkReply* reply)
     q->parseResponse(restResult, response);
     }
 
-  foreach(const QNetworkReply::RawHeaderPair& rawHeaderPair, reply->rawHeaderPairs())
-    {
-    restResult->setRawHeader(rawHeaderPair.first, rawHeaderPair.second);
-    }
+  #if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
+    foreach(const QNetworkReply::RawHeaderPair& rawHeaderPair, reply->rawHeaderPairs())
+      {
+      restResult->setRawHeader(rawHeaderPair.first, rawHeaderPair.second);
+      }
+  #else
+    foreach(const QByteArray& headerName, reply->rawHeaderList())
+      {
+      restResult->setRawHeader(headerName, reply->rawHeader(headerName));
+      }
+  #endif
 
   reply->close();
   reply->deleteLater();
