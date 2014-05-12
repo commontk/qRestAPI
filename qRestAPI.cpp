@@ -453,15 +453,15 @@ const QVariant qRestAPI::head(const QString  resource, const QNetworkRequest::Kn
   qRestResult* result = d->results.take(queryId);
   QVariant header;
   if (ok)
-  {
+    {
     header = queryReply->header(headerType);
-  }
+    }
   else
-  {
+    {
     d->ErrorCode = result->errorType();
     d->ErrorString = result->error();
-    delete result;
-  }
+    }
+  delete result;
   return header;
 }
 
