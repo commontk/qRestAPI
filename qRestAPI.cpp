@@ -443,26 +443,12 @@ QUuid qRestAPI::get(QIODevice* output, const QString& resource, const Parameters
 }
 
 // --------------------------------------------------------------------------
-const QVariant qRestAPI::head(const QString  resource, const QNetworkRequest::KnownHeaders headerType, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders)
+QUuid qRestAPI::head(const QString  resource, const QNetworkRequest::KnownHeaders headerType, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders)
 {
-  Q_D(qRestAPI);
   QUrl url = createUrl(resource, parameters);
   QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::HeadOperation, url, rawHeaders);
   QUuid queryId = QUuid(queryReply->property("uuid").toString());
-  bool ok = d->results[queryId]->waitForDone();
-  qRestResult* result = d->results.take(queryId);
-  QVariant header;
-  if (ok)
-    {
-    header = queryReply->header(headerType);
-    }
-  else
-    {
-    d->ErrorCode = result->errorType();
-    d->ErrorString = result->error();
-    }
-  delete result;
-  return header;
+  return queryId;
 }
 
 // --------------------------------------------------------------------------

@@ -154,7 +154,7 @@ public:
   /// resultReceived() is emitted when a result is received from the server,
   /// it is fired even if errors are received.
   /// Returns a QVariant which holds the header information specified by \a headerType
-  virtual const QVariant head(const QString resource,
+  virtual QUuid head(const QString resource,
                               const QNetworkRequest::KnownHeaders headerType,
                               const Parameters& parameters = Parameters(),
                               const RawHeaders& rawHeaders = RawHeaders());
