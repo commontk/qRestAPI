@@ -443,7 +443,7 @@ QUuid qRestAPI::get(QIODevice* output, const QString& resource, const Parameters
 }
 
 // --------------------------------------------------------------------------
-QUuid qRestAPI::head(const QString  resource, const QNetworkRequest::KnownHeaders headerType, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders)
+QUuid qRestAPI::head(const QString  resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders)
 {
   QUrl url = createUrl(resource, parameters);
   QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::HeadOperation, url, rawHeaders);

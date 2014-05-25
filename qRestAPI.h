@@ -145,7 +145,6 @@ public:
 
   /// Sends a HEAD request to the web service.
   /// The \a resource and \parameters are used to compose the URL.
-  /// \a headerType can be used to specify the part of the header to be returned
   /// \a rawHeaders can be used to set the raw headers of the request to send.
   /// These headers will be set additionally to those defined by the
   /// \a defaultRawHeaders property.
@@ -153,9 +152,8 @@ public:
   /// errors.
   /// resultReceived() is emitted when a result is received from the server,
   /// it is fired even if errors are received.
-  /// Returns a QVariant which holds the header information specified by \a headerType
+  /// Returns a unique identifier of the posted query.
   virtual QUuid head(const QString resource,
-                              const QNetworkRequest::KnownHeaders headerType,
                               const Parameters& parameters = Parameters(),
                               const RawHeaders& rawHeaders = RawHeaders());
 
