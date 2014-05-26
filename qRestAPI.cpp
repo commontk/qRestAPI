@@ -27,6 +27,9 @@
 #include <QTimer>
 #include <QUuid>
 #include <QScriptValueIterator>
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#include <QUrlQuery>
+#endif
 
 // qRestAPI includes
 #include "qRestAPI.h"
@@ -386,10 +389,19 @@ QUrl qRestAPI::createUrl(const QString& resource, const qRestAPI::Parameters& pa
 {
   Q_D(qRestAPI);
   QUrl url(d->ServerUrl + resource);
+#if (QT_VERSION < QT_VERSION_CHECK(5,0,0))
   foreach(const QString& parameter, parameters.keys())
     {
     url.addQueryItem(parameter, parameters[parameter]);
     }
+#else
+  QUrlQuery urlQuery(url);
+  foreach(const QString& parameter, parameters.keys())
+    {
+    urlQuery.addQueryItem(parameter, parameters[parameter]);
+    }
+  url.setQuery(urlQuery);
+#endif
   return url;
 }
 
@@ -541,7 +553,7 @@ bool qRestAPI::sync(const QUuid& queryId, QList<QVariantMap>& result)
     return ok;
     }
   d->ErrorCode = UnknownUuidError;
-  d->ErrorString = unknownUuidStr.arg(queryId);
+  d->ErrorString = unknownUuidStr.arg(queryId.toString());
   return false;
 }
 
