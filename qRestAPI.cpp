@@ -123,6 +123,9 @@ QNetworkReply* qRestAPI::sendRequest(QNetworkAccessManager::Operation operation,
     case QNetworkAccessManager::PostOperation:
       queryReply = d->NetworkManager->post(queryRequest, QByteArray());
       break;
+    case QNetworkAccessManager::HeadOperation:
+      queryReply = d->NetworkManager->head(queryRequest);
+      break;
     default:
       // TODO
       return 0;
@@ -448,6 +451,15 @@ QUuid qRestAPI::get(QIODevice* output, const QString& resource, const Parameters
   connect(queryReply, SIGNAL(finished()),
           result, SLOT(downloadFinished()));
 
+  return queryId;
+}
+
+// --------------------------------------------------------------------------
+QUuid qRestAPI::head(const QString  resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders)
+{
+  QUrl url = createUrl(resource, parameters);
+  QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::HeadOperation, url, rawHeaders);
+  QUuid queryId = QUuid(queryReply->property("uuid").toString());
   return queryId;
 }
 
