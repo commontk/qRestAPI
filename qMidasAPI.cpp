@@ -21,6 +21,9 @@
 // Qt includes
 #include <QEventLoop>
 #include <QUrl>
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#include <QUrlQuery>
+#endif
 
 // qMidasAPI includes
 #include "qMidasAPI.h"
@@ -126,10 +129,19 @@ QUrl qMidasAPI::createUrl(const QString& method, const qRestAPI::Parameters& par
 {
   QString responseType = "json";
   QUrl url = Superclass::createUrl("/api/" + responseType, parameters);
+#if (QT_VERSION < QT_VERSION_CHECK(5,0,0))
   if (!method.isEmpty())
     {
     url.addQueryItem("method", method);
     }
+#else
+  QUrlQuery urlQuery(url);
+  if (!method.isEmpty())
+    {
+    urlQuery.addQueryItem("method", method);
+    }
+  url.setQuery(urlQuery);
+#endif
   return url;
 }
 
