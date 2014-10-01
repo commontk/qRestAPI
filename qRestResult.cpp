@@ -57,7 +57,7 @@ const QList<QVariantMap>& qRestResult::results() const
 // --------------------------------------------------------------------------
 const QVariantMap qRestResult::result() const
 {
-  return this->Result[0];
+  return this->Result.isEmpty() ? QVariantMap() : this->Result[0];
 }
 
 // --------------------------------------------------------------------------
