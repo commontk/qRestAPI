@@ -90,7 +90,8 @@ void qRestAPIPrivate::init()
 // --------------------------------------------------------------------------
 QNetworkReply* qRestAPI::sendRequest(QNetworkAccessManager::Operation operation,
     const QUrl& url,
-    const qRestAPI::RawHeaders& rawHeaders)
+    const qRestAPI::RawHeaders& rawHeaders,
+    const QByteArray &data)
 {
   Q_D(qRestAPI);
   QNetworkRequest queryRequest;
@@ -118,10 +119,10 @@ QNetworkReply* qRestAPI::sendRequest(QNetworkAccessManager::Operation operation,
       queryReply = d->NetworkManager->deleteResource(queryRequest);
       break;
     case QNetworkAccessManager::PutOperation:
-      queryReply = d->NetworkManager->put(queryRequest, QByteArray());
+      queryReply = d->NetworkManager->put(queryRequest, data);
       break;
     case QNetworkAccessManager::PostOperation:
-      queryReply = d->NetworkManager->post(queryRequest, QByteArray());
+      queryReply = d->NetworkManager->post(queryRequest, data);
       break;
     case QNetworkAccessManager::HeadOperation:
       queryReply = d->NetworkManager->head(queryRequest);
@@ -521,7 +522,8 @@ QUuid qRestAPI::upload(const QString& fileName, const QString& resource, const P
     return queryId;
     }
 
-  QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::PutOperation, url, rawHeaders);
+  QByteArray data = input->readAll();
+  QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::PutOperation, url, rawHeaders, data);
 
   qRestResult* result = new qRestResult(queryId, queryReply);
   result->ioDevice = input;

@@ -260,7 +260,8 @@ signals:
 protected:
   QNetworkReply* sendRequest(QNetworkAccessManager::Operation operation,
       const QUrl& url,
-      const RawHeaders& rawHeaders = RawHeaders());
+      const RawHeaders& rawHeaders = RawHeaders(),
+      const QByteArray& data = QByteArray());
 
   virtual QUrl createUrl(const QString& method, const qRestAPI::Parameters& parameters);
   virtual void parseResponse(qRestResult* restResult, const QByteArray& response);
