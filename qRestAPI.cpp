@@ -139,10 +139,6 @@ QNetworkReply* qRestAPI::sendRequest(QNetworkAccessManager::Operation operation,
     QObject::connect(timeOut, SIGNAL(timeout()),
                      d, SLOT(queryTimeOut()));
     timeOut->start(d->TimeOut);
-    QObject::connect(queryReply, SIGNAL(downloadProgress(qint64,qint64)),
-                     d, SLOT(queryProgress(qint64, qint64)));
-    QObject::connect(queryReply, SIGNAL(uploadProgress(qint64,qint64)),
-                     d, SLOT(queryProgress(qint64, qint64)));
     }
 
   QUuid queryId = QUuid::createUuid();
