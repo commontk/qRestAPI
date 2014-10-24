@@ -145,18 +145,6 @@ void qRestResult::downloadFinished()
 }
 
 // --------------------------------------------------------------------------
-void qRestResult::uploadReadyWrite()
-{
-  QNetworkReply* reply = qobject_cast<QNetworkReply*>(this->sender());
-  Q_ASSERT(reply);
-  if (!reply)
-    {
-    return;
-    }
-  reply->write(ioDevice->readAll());
-}
-
-// --------------------------------------------------------------------------
 void qRestResult::uploadFinished()
 {
   ioDevice->close();
