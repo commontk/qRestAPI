@@ -228,6 +228,7 @@ void qRestAPIPrivate::processReply(QNetworkReply* reply)
       }
   #endif
 
+    qDebug()<< reply->errorString() << "RESULT: " << reply->readAll() << "HTTP STATUS: "<<reply->attribute( QNetworkRequest::HttpStatusCodeAttribute).toInt();
   reply->close();
   reply->deleteLater();
 }
@@ -497,42 +498,51 @@ QUuid qRestAPI::put(const QString& resource, const Parameters& parameters, const
   return queryId;
 }
 
-// --------------------------------------------------------------------------
-QUuid qRestAPI::upload(const QString& fileName, const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders)
+QUuid qRestAPI::put(QIODevice *input, const QString &resource, const qRestAPI::Parameters &parameters, const qRestAPI::RawHeaders &rawHeaders)
 {
   Q_D(qRestAPI);
 
-  QUuid queryId = QUuid::createUuid();
-
   QUrl url = createUrl(resource, parameters);
-  QIODevice* input = new QFile(fileName);
-  if (!input->open(QIODevice::ReadOnly))
+  if (!input->isOpen() && !input->open(QIODevice::ReadOnly))
     {
-//    delete input;
     QString error =
-        QString("Cannot open file '%1' for reading to upload '%2'.").arg(
-              fileName,
-              url.toEncoded().constData());
-
-//    emit errorReceived(queryId, error);
+        QString("Cannot open input device!");
+    qDebug() << error;
+    QUuid queryId;
+    // TODO How to raise the error? We do not have a qRestResult object yet...
+    //    emit errorReceived(queryId, "Cannot open device for writing.");
     return queryId;
     }
 
   QByteArray data = input->readAll();
+
   QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::PutOperation, url, rawHeaders, data);
+  QUuid queryId (queryReply->property("uuid").toString());
 
-  qRestResult* result = new qRestResult(queryId, queryReply);
+  qRestResult* result = d->results[queryId];
   result->ioDevice = input;
-  result->ioDevice->setParent(result);
-
   connect(queryReply, SIGNAL(uploadProgress(qint64,qint64)),
           d, SLOT(uploadProgress(qint64,qint64)));
   connect(queryReply, SIGNAL(finished()),
           result, SLOT(uploadFinished()));
-  connect(queryReply, SIGNAL(readyWrite()),
-          result, SLOT(uploadReadyWrite()));
 
-  queryReply->setProperty("uuid", queryId.toString());
+  return queryId;
+}
+
+// --------------------------------------------------------------------------
+QUuid qRestAPI::upload(const QString& fileName, const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders)
+{
+  QIODevice* input = new QFile(fileName);
+  if (!input->open(QIODevice::ReadOnly))
+    {
+    QString error =
+        QString("Cannot open file '%1'.").arg(
+          fileName);
+    qDebug() << error;
+    }
+
+  QUuid queryId = put(input, resource, parameters);
+
   return queryId;
 }
 

@@ -206,12 +206,18 @@ public:
   /// \a rawHeaders can be used to set the raw headers of the request to send.
   /// These headers will be set additionally to those defined by the
   /// \a defaultRawHeaders property.
+  /// If an \a input is specified it will be send together with the request.
   /// errorReceived() is emitted if no server is found or if the server sends
   /// errors.
   /// resultReceived() is emitted when a result is received from the server,
   /// it is fired even if errors are received.
   /// Returns a unique identifier of the posted query.
   QUuid put(const QString& resource,
+    const Parameters& parameters = Parameters(),
+    const RawHeaders& rawHeaders = RawHeaders());
+
+  virtual QUuid put(QIODevice* input,
+    const QString& resource,
     const Parameters& parameters = Parameters(),
     const RawHeaders& rawHeaders = RawHeaders());
 
