@@ -228,7 +228,6 @@ void qRestAPIPrivate::processReply(QNetworkReply* reply)
       }
   #endif
 
-    qDebug()<< reply->errorString() << "RESULT: " << reply->readAll() << "HTTP STATUS: "<<reply->attribute( QNetworkRequest::HttpStatusCodeAttribute).toInt();
   reply->close();
   reply->deleteLater();
 }
