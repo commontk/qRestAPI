@@ -262,6 +262,7 @@ public:
 signals:
   void finished(const QUuid& queryId);
   void progress(const QUuid& queryId, double progress);
+  void uploadFinished();
 
 protected:
   QNetworkReply* sendRequest(QNetworkAccessManager::Operation operation,
