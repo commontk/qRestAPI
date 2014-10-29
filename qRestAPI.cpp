@@ -542,7 +542,7 @@ QUuid qRestAPI::upload(const QString& fileName, const QString& resource, const P
     qDebug() << error;
     }
 
-  QUuid queryId = put(input, resource, parameters);
+  QUuid queryId = put(input, resource, parameters, rawHeaders);
 
   return queryId;
 }
