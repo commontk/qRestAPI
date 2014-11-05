@@ -463,9 +463,13 @@ QUuid qRestAPI::head(const QString  resource, const Parameters& parameters, cons
 // --------------------------------------------------------------------------
 QUuid qRestAPI::download(const QString& fileName, const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders)
 {
+  Q_D(qRestAPI);
+
   QIODevice* output = new QFile(fileName);
 
   QUuid queryId = get(output, resource, parameters);
+
+  output->setParent(d->results[queryId]);
 
   return queryId;
 }
@@ -538,10 +542,7 @@ QUuid qRestAPI::upload(const QString& fileName, const QString& resource, const P
 
   QUuid queryId = this->put(input, resource, parameters, rawHeaders);
 
-  if (d->results[queryId]->errorType() == qRestAPI::FileError)
-    {
-    delete input;
-    }
+  input->setParent(d->results[queryId]);
 
   return queryId;
 }
