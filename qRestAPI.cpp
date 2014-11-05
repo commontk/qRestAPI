@@ -528,8 +528,6 @@ QUuid qRestAPI::put(QIODevice *input, const QString &resource, const qRestAPI::P
           d, SLOT(uploadProgress(qint64,qint64)));
   connect(queryReply, SIGNAL(finished()),
           result, SLOT(uploadFinished()));
-  connect(queryReply, SIGNAL(finished()),
-          this, SIGNAL(uploadFinished()));
 
   return queryId;
 }
