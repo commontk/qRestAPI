@@ -69,7 +69,6 @@ public slots:
 
   void downloadReadyRead();
   void downloadFinished();
-  void uploadReadyWrite();
   void uploadFinished();
 
 signals:

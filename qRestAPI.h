@@ -92,6 +92,8 @@ public:
     /// The remote server requires authentication but the credentials
     /// provided were not accepted (if any).
     AuthenticationError = 5,
+    /// Error is raised if a file could not be opened
+    FileError = 6,
     /// General network error not covered by more specific error types
     NetworkError = 100
   };
@@ -206,12 +208,18 @@ public:
   /// \a rawHeaders can be used to set the raw headers of the request to send.
   /// These headers will be set additionally to those defined by the
   /// \a defaultRawHeaders property.
+  /// If an \a input is specified it will be send together with the request.
   /// errorReceived() is emitted if no server is found or if the server sends
   /// errors.
   /// resultReceived() is emitted when a result is received from the server,
   /// it is fired even if errors are received.
   /// Returns a unique identifier of the posted query.
   QUuid put(const QString& resource,
+    const Parameters& parameters = Parameters(),
+    const RawHeaders& rawHeaders = RawHeaders());
+
+  virtual QUuid put(QIODevice* input,
+    const QString& resource,
     const Parameters& parameters = Parameters(),
     const RawHeaders& rawHeaders = RawHeaders());
 
@@ -260,7 +268,8 @@ signals:
 protected:
   QNetworkReply* sendRequest(QNetworkAccessManager::Operation operation,
       const QUrl& url,
-      const RawHeaders& rawHeaders = RawHeaders());
+      const RawHeaders& rawHeaders = RawHeaders(),
+      const QByteArray& data = QByteArray());
 
   virtual QUrl createUrl(const QString& method, const qRestAPI::Parameters& parameters);
   virtual void parseResponse(qRestResult* restResult, const QByteArray& response);

@@ -90,7 +90,8 @@ void qRestAPIPrivate::init()
 // --------------------------------------------------------------------------
 QNetworkReply* qRestAPI::sendRequest(QNetworkAccessManager::Operation operation,
     const QUrl& url,
-    const qRestAPI::RawHeaders& rawHeaders)
+    const qRestAPI::RawHeaders& rawHeaders,
+    const QByteArray &data)
 {
   Q_D(qRestAPI);
   QNetworkRequest queryRequest;
@@ -118,10 +119,10 @@ QNetworkReply* qRestAPI::sendRequest(QNetworkAccessManager::Operation operation,
       queryReply = d->NetworkManager->deleteResource(queryRequest);
       break;
     case QNetworkAccessManager::PutOperation:
-      queryReply = d->NetworkManager->put(queryRequest, QByteArray());
+      queryReply = d->NetworkManager->put(queryRequest, data);
       break;
     case QNetworkAccessManager::PostOperation:
-      queryReply = d->NetworkManager->post(queryRequest, QByteArray());
+      queryReply = d->NetworkManager->post(queryRequest, data);
       break;
     case QNetworkAccessManager::HeadOperation:
       queryReply = d->NetworkManager->head(queryRequest);
@@ -138,10 +139,6 @@ QNetworkReply* qRestAPI::sendRequest(QNetworkAccessManager::Operation operation,
     QObject::connect(timeOut, SIGNAL(timeout()),
                      d, SLOT(queryTimeOut()));
     timeOut->start(d->TimeOut);
-    QObject::connect(queryReply, SIGNAL(downloadProgress(qint64,qint64)),
-                     d, SLOT(queryProgress(qint64, qint64)));
-    QObject::connect(queryReply, SIGNAL(uploadProgress(qint64,qint64)),
-                     d, SLOT(queryProgress(qint64, qint64)));
     }
 
   QUuid queryId = QUuid::createUuid();
@@ -466,9 +463,13 @@ QUuid qRestAPI::head(const QString  resource, const Parameters& parameters, cons
 // --------------------------------------------------------------------------
 QUuid qRestAPI::download(const QString& fileName, const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders)
 {
+  Q_D(qRestAPI);
+
   QIODevice* output = new QFile(fileName);
 
   QUuid queryId = get(output, resource, parameters);
+
+  output->setParent(d->results[queryId]);
 
   return queryId;
 }
@@ -500,41 +501,47 @@ QUuid qRestAPI::put(const QString& resource, const Parameters& parameters, const
   return queryId;
 }
 
-// --------------------------------------------------------------------------
-QUuid qRestAPI::upload(const QString& fileName, const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders)
+QUuid qRestAPI::put(QIODevice *input, const QString &resource, const qRestAPI::Parameters &parameters, const qRestAPI::RawHeaders &rawHeaders)
 {
   Q_D(qRestAPI);
 
-  QUuid queryId = QUuid::createUuid();
-
   QUrl url = createUrl(resource, parameters);
-  QIODevice* input = new QFile(fileName);
-  if (!input->open(QIODevice::ReadOnly))
+  if (!input->isOpen() && !input->open(QIODevice::ReadOnly))
     {
-//    delete input;
-    QString error =
-        QString("Cannot open file '%1' for reading to upload '%2'.").arg(
-              fileName,
-              url.toEncoded().constData());
-
-//    emit errorReceived(queryId, error);
-    return queryId;
+    QUuid uid = QUuid::createUuid();
+    qRestResult* restResult = new qRestResult(uid);
+    restResult->setError(uid.toString() + ": "  +
+                         "Could not open file for upload!",
+                         qRestAPI::FileError);
+    d->results[uid] = restResult;
+    return uid;
     }
 
-  QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::PutOperation, url, rawHeaders);
+  QByteArray data = input->readAll();
 
-  qRestResult* result = new qRestResult(queryId, queryReply);
+  QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::PutOperation, url, rawHeaders, data);
+  QUuid queryId (queryReply->property("uuid").toString());
+
+  qRestResult* result = d->results[queryId];
   result->ioDevice = input;
-  result->ioDevice->setParent(result);
-
   connect(queryReply, SIGNAL(uploadProgress(qint64,qint64)),
           d, SLOT(uploadProgress(qint64,qint64)));
   connect(queryReply, SIGNAL(finished()),
           result, SLOT(uploadFinished()));
-  connect(queryReply, SIGNAL(readyWrite()),
-          result, SLOT(uploadReadyWrite()));
 
-  queryReply->setProperty("uuid", queryId.toString());
+  return queryId;
+}
+
+// --------------------------------------------------------------------------
+QUuid qRestAPI::upload(const QString& fileName, const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders)
+{
+  Q_D(qRestAPI);
+  QIODevice* input = new QFile(fileName);
+
+  QUuid queryId = this->put(input, resource, parameters, rawHeaders);
+
+  input->setParent(d->results[queryId]);
+
   return queryId;
 }
 
