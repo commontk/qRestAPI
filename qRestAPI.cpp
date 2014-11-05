@@ -504,13 +504,13 @@ QUuid qRestAPI::put(QIODevice *input, const QString &resource, const qRestAPI::P
   QUrl url = createUrl(resource, parameters);
   if (!input->isOpen() && !input->open(QIODevice::ReadOnly))
     {
-    QString error =
-        QString("Cannot open input device!");
-    qDebug() << error;
-    QUuid queryId;
-    // TODO How to raise the error? We do not have a qRestResult object yet...
-    //    emit errorReceived(queryId, "Cannot open device for writing.");
-    return queryId;
+    QUuid uid = QUuid::createUuid();
+    qRestResult* restResult = new qRestResult(uid);
+    restResult->setError(uid.toString() + ": "  +
+                         "Could not open file for upload!",
+                         qRestAPI::FileError);
+    d->results[uid] = restResult;
+    return uid;
     }
 
   QByteArray data = input->readAll();
@@ -533,16 +533,15 @@ QUuid qRestAPI::put(QIODevice *input, const QString &resource, const qRestAPI::P
 // --------------------------------------------------------------------------
 QUuid qRestAPI::upload(const QString& fileName, const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders)
 {
+  Q_D(qRestAPI);
   QIODevice* input = new QFile(fileName);
-  if (!input->open(QIODevice::ReadOnly))
-    {
-    QString error =
-        QString("Cannot open file '%1'.").arg(
-          fileName);
-    qDebug() << error;
-    }
 
-  QUuid queryId = put(input, resource, parameters, rawHeaders);
+  QUuid queryId = this->put(input, resource, parameters, rawHeaders);
+
+  if (d->results[queryId]->errorType() == qRestAPI::FileError)
+    {
+    delete input;
+    }
 
   return queryId;
 }

@@ -92,6 +92,8 @@ public:
     /// The remote server requires authentication but the credentials
     /// provided were not accepted (if any).
     AuthenticationError = 5,
+    /// Error is raised if a file could not be opened
+    FileError = 6,
     /// General network error not covered by more specific error types
     NetworkError = 100
   };
