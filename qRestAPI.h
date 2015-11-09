@@ -113,6 +113,9 @@ public:
   /// Sets the URL of the web application.
   void setServerUrl(const QString& serverUrl);
 
+  /// Sets the HTTP network proxy that will be used for all queries
+  void setHttpNetworkProxy(const QNetworkProxy& proxy);
+
   /// Returns the raw headers that are set for every request.
   RawHeaders defaultRawHeaders()const;
   /// Sets the raw headers to be set for every request.
