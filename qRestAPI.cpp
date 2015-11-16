@@ -93,9 +93,9 @@ void qRestAPI::setHttpNetworkProxy(const QNetworkProxy &proxy)
   Q_D(qRestAPI);
 
   if (d->NetworkManager != NULL)
-  {
+    {
     d->NetworkManager->setProxy(proxy);
-  }
+    }
 }
 
 // --------------------------------------------------------------------------
