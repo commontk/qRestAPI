@@ -88,6 +88,17 @@ void qRestAPIPrivate::init()
 }
 
 // --------------------------------------------------------------------------
+void qRestAPI::setHttpNetworkProxy(const QNetworkProxy &proxy)
+{
+  Q_D(qRestAPI);
+
+  if (d->NetworkManager != NULL)
+    {
+    d->NetworkManager->setProxy(proxy);
+    }
+}
+
+// --------------------------------------------------------------------------
 QNetworkReply* qRestAPI::sendRequest(QNetworkAccessManager::Operation operation,
     const QUrl& url,
     const qRestAPI::RawHeaders& rawHeaders,
