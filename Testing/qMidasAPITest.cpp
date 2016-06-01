@@ -210,5 +210,23 @@ int qMidasAPITest(int argc, char* argv[])
     return EXIT_FAILURE;
     }
 
+  // --------------------------------------------------------------------------
+  // Synchronous query: midas.slicerpackages.extension.list
+  // --------------------------------------------------------------------------
+  qMidasAPI::ParametersType parameters;
+  parameters["productname"] = "SlicerProstate";
+  parameters["slicer_revision"] = "25138";
+  parameters["os"] = "macosx";
+  parameters["arch"] = "amd64";
+  result= qMidasAPI::synchronousQuery(ok, "http://slicer.kitware.com/midas3",
+      "midas.slicerpackages.extension.list", parameters);
+  std::cout << "result: " <<
+    qPrintable(qMidasAPI::qVariantMapListToString(result))<< std::endl;
+  if (!ok || result.size() == 0)
+    {
+    std::cout << "Failed to query 'midas.slicerpackages.extension.list'." << std::endl;
+    return EXIT_FAILURE;
+    }
+
   return EXIT_SUCCESS;
 }
