@@ -40,6 +40,7 @@ void qMidasAPIResult::setResult(const QUuid& queryUuid, const QList<QVariantMap>
 // --------------------------------------------------------------------------
 void qMidasAPIResult::setError(const QUuid& queryUuid, const QString& error)
 {
+  Q_UNUSED(queryUuid);
   this->Error += error;
 }
 
@@ -90,10 +91,11 @@ QList<QVariantMap> qMidasAPI::synchronousQuery(
   const ParametersType& parameters,
   int maxWaitingTimeInMSecs)
 {
+  Q_UNUSED(method);
+  Q_UNUSED(parameters);
   qMidasAPI restAPI;
   restAPI.setServerUrl(serverUrl);
   restAPI.setTimeOut(maxWaitingTimeInMSecs);
-  QUuid queryUuid = restAPI.get(method, parameters);
   qMidasAPIResult queryResult;
   QObject::connect(&restAPI, SIGNAL(resultReceived(QUuid,QList<QVariantMap>)),
                    &queryResult, SLOT(setResult(QUuid,QList<QVariantMap>)));
