@@ -276,6 +276,8 @@ void qRestAPIPrivate::onSslErrors(QNetworkReply* reply, const QList<QSslError>& 
 // --------------------------------------------------------------------------
 void qRestAPIPrivate::queryProgress(qint64 bytesTransmitted, qint64 bytesTotal)
 {
+  Q_UNUSED(bytesTransmitted);
+  Q_UNUSED(bytesTotal);
   QNetworkReply* reply = qobject_cast<QNetworkReply*>(this->sender());
   // We received some progress so we postpone the timeout if any.
   QTimer* timer = reply->findChild<QTimer*>();
@@ -419,6 +421,7 @@ QUrl qRestAPI::createUrl(const QString& resource, const qRestAPI::Parameters& pa
 // --------------------------------------------------------------------------
 void qRestAPI::parseResponse(qRestResult* restResult, const QByteArray& response)
 {
+  Q_UNUSED(response);
   QList<QVariantMap> result;
   restResult->setResult(result);
 }
@@ -474,6 +477,7 @@ QUuid qRestAPI::head(const QString  resource, const Parameters& parameters, cons
 // --------------------------------------------------------------------------
 QUuid qRestAPI::download(const QString& fileName, const QString& resource, const Parameters& parameters, const qRestAPI::RawHeaders& rawHeaders)
 {
+  Q_UNUSED(rawHeaders);
   Q_D(qRestAPI);
 
   QIODevice* output = new QFile(fileName);
