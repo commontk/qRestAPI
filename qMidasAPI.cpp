@@ -96,6 +96,8 @@ QList<QVariantMap> qMidasAPI::synchronousQuery(
   qMidasAPI restAPI;
   restAPI.setServerUrl(serverUrl);
   restAPI.setTimeOut(maxWaitingTimeInMSecs);
+  QUuid queryUuid = restAPI.get(method, parameters);
+  Q_UNUSED(queryUuid);
   qMidasAPIResult queryResult;
   QObject::connect(&restAPI, SIGNAL(resultReceived(QUuid,QList<QVariantMap>)),
                    &queryResult, SLOT(setResult(QUuid,QList<QVariantMap>)));
