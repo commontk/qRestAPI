@@ -78,7 +78,7 @@ void qRestAPIPrivate::init()
   this->NetworkManager = new QNetworkAccessManager();
   QObject::connect(this->NetworkManager, SIGNAL(finished(QNetworkReply*)),
                    this, SLOT(processReply(QNetworkReply*)));
-#ifndef QT_NO_OPENSSL
+#ifndef QRESTAPI_NO_SSL
   if (QSslSocket::supportsSsl())
     {
     QObject::connect(this->NetworkManager, SIGNAL(sslErrors(QNetworkReply*, QList<QSslError>)),
@@ -243,9 +243,12 @@ void qRestAPIPrivate::processReply(QNetworkReply* reply)
   reply->deleteLater();
 }
 
-#ifndef QT_NO_OPENSSL
 void qRestAPIPrivate::onSslErrors(QNetworkReply* reply, const QList<QSslError>& errors)
 {
+#ifdef QRESTAPI_NO_SSL
+  Q_UNUSED(reply)
+  Q_UNUSED(errors)
+#else
   if (!this->SuppressSslErrors)
     {
     QString errorString;
@@ -270,8 +273,8 @@ void qRestAPIPrivate::onSslErrors(QNetworkReply* reply, const QList<QSslError>& 
     {
     reply->ignoreSslErrors();
     }
-}
 #endif
+}
 
 // --------------------------------------------------------------------------
 void qRestAPIPrivate::queryProgress(qint64 bytesTransmitted, qint64 bytesTotal)

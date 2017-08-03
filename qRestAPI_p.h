@@ -28,14 +28,26 @@
 #endif
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
-#ifndef QT_NO_OPENSSL
-  #include <QSslError>
-#endif
+#include <QSslError>
 
 // qRestAPI includes
 #include "qRestAPI.h"
 
 class QIODevice;
+
+#if (QT_VERSION < QT_VERSION_CHECK(5, 3, 0))
+#ifdef QT_NO_OPENSSL
+#define QRESTAPI_QT_NO_SSL
+#endif
+#else
+#ifdef QT_NO_SSL
+#define QRESTAPI_QT_NO_SSL
+#endif
+#endif
+
+#ifdef QRESTAPI_QT_NO_SSL
+struct QSslError{};
+#endif
 
 // --------------------------------------------------------------------------
 class qRestAPIPrivate : public QObject
@@ -72,9 +84,7 @@ public slots:
   void downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
   void uploadProgress(qint64 bytesSent, qint64 bytesTotal);
 
-#ifndef QT_NO_OPENSSL
   void onSslErrors(QNetworkReply* reply, const QList<QSslError>& errors);
-#endif
 
 //  void onAuthenticationRequired(QNetworkReply* reply, QAuthenticator* authenticator);
 
