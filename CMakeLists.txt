@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.5.0)
 
 project(qRestAPI)
 
+set(CMAKE_INCLUDE_CURRENT_DIR 1)
+set(CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE 1)
 set(CMAKE_POSITION_INDEPENDENT_CODE 1)
 
 option(BUILD_SHARED_LIBS "Build shared library" ON)
@@ -27,9 +29,6 @@ else()
   find_package(Qt4 4.6.2 COMPONENTS QtCore QtGui QtNetwork QtScript QtXml QtTest REQUIRED)
   include(${QT_USE_FILE})
 endif()
-
-set(qRestAPI_INCLUDE_DIRS ${qRestAPI_SOURCE_DIR} ${qRestAPI_BINARY_DIR})
-include_directories(${qRestAPI_INCLUDE_DIRS})
 
 configure_file(
   qRestAPI_Export.h.in

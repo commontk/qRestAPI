@@ -1,10 +1,5 @@
 include(MacroAddFileDependencies)
 
-include_directories(
-  ${qRestAPI_SOURCE_DIR}
-  ${CMAKE_CURRENT_BINARY_DIR}
-  )
-
 set(KIT_TEST_SRCS
   qGirderAPITest.cpp
   qMidasAPITest.cpp
