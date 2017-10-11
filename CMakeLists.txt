@@ -1,3 +1,7 @@
+cmake_minimum_required(VERSION 3.5.0)
+
+set(CMAKE_POSITION_INDEPENDENT_CODE 1)
+
 set(qRestAPI_QT_VERSION "4" CACHE STRING "Expected Qt version")
 mark_as_advanced(qRestAPI_QT_VERSION)
 
@@ -8,11 +12,8 @@ if(NOT (qRestAPI_QT_VERSION VERSION_EQUAL "4" OR qRestAPI_QT_VERSION VERSION_EQU
 endif()
 
 if(qRestAPI_QT_VERSION VERSION_GREATER "4")
-  cmake_minimum_required(VERSION 2.8.12)
   set(QT5_INSTALL_PREFIX "" CACHE PATH "The install location of Qt5")
   set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QT5_INSTALL_PREFIX})
-else()
-  cmake_minimum_required(VERSION 2.8.2)
 endif()
 
 project(qRestAPI)
@@ -69,12 +70,6 @@ if(qRestAPI_QT_VERSION VERSION_GREATER "4")
   target_link_libraries(${PROJECT_NAME} Qt5::Gui Qt5::Network Qt5::Script)
 else()
   target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES})
-endif()
-
-# To fix compilation problem: relocation R_X86_64_32 against `a local symbol' can not be
-# used when making a shared object; recompile with -fPIC
-if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
-  set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-fPIC")
 endif()
 
 include(CTest)
