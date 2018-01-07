@@ -119,8 +119,6 @@ QList<QVariantMap> qMidasAPI::synchronousQuery(
     }
   if (queryResult.Result.count() == 0)
     {
-    // \tbd
-    Q_ASSERT(queryResult.Result.count());
     QVariantMap map;
     map["queryError"] = tr("Unknown error");
     queryResult.Result.push_front(map);
