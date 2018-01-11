@@ -56,7 +56,9 @@ public:
 
   const QList<QVariantMap>& results() const;
   const QVariantMap result() const;
+  // FIXME: for consistency with the qRestAPI class, this method should be called errorString()
   const QString& error() const;
+  // FIXME: for consistency with the qRestAPI class, this method should be called error()
   qRestAPI::ErrorType errorType() const;
 
   QByteArray rawHeader(const QByteArray& name) const;
@@ -64,7 +66,7 @@ public:
 
 public slots:
   void setResult();
-  void setResult(const QList<QVariantMap>& result);
+  void setResult(const QList<QVariantMap>& result); // FIXME: should be called setResults(), see getters
   void setError(const QString& error, qRestAPI::ErrorType errorType = qRestAPI::UnknownError);
 
   void downloadReadyRead();
