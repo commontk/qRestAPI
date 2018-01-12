@@ -86,6 +86,7 @@ QList<QVariantMap> qMidasAPI::synchronousQuery(
   QUuid queryUuid = restAPI.get(method, parameters);
   
   QList<QVariantMap> result;
+  ok = false;
   QScopedPointer<qRestResult> restResult(restAPI.takeResult(queryUuid));
   if(restResult)
     {
@@ -95,6 +96,10 @@ QList<QVariantMap> qMidasAPI::synchronousQuery(
       QVariantMap map;
       map["queryError"] = restResult->error();
       result.push_front(map);
+      }
+    else
+      {
+      ok = true;
       }
     }
   
