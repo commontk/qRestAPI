@@ -91,16 +91,17 @@ QList<QVariantMap> qMidasAPI::synchronousQuery(
   if(restResult)
     {
     result = restResult->results();
-    if (restResult->errorType() != qRestAPI::NoError)
-      {
-      QVariantMap map;
-      map["queryError"] = restResult->error();
-      result.push_front(map);
-      }
-    else
-      {
-      ok = true;
-      }
+    }
+  
+  if (restAPI.error() != qRestAPI::UnknownError)
+    {
+    QVariantMap map;
+    map["queryError"] = restAPI.errorString();
+    result.push_front(map);
+    }
+  else
+    {
+    ok = true;
     }
   
   if (result.count() == 0)
