@@ -614,6 +614,8 @@ qRestResult* qRestAPI::takeResult(const QUuid& queryId)
   Q_D(qRestAPI);
   if (d->results.contains(queryId))
     {
+    // Do /not/ try to .take() the query before calling waitForDone();
+    // the latter triggers SIGNALs which access d->results.
     bool ok = d->results[queryId]->waitForDone();
     qRestResult* result = d->results.take(queryId);
     if (ok)
