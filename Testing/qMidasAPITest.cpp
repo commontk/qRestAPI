@@ -122,7 +122,7 @@ int qMidasAPITest(int argc, char* argv[])
       receivedSpy.count() != 1)
     {
     std::cerr << "Failed to query 'midas.version': "
-              << errorSpy.count() << " errors,"
+              << errorSpy.count() << " errors, "
               << receivedSpy.count() << " results." << std::endl;
     return EXIT_FAILURE;
     }
@@ -143,7 +143,7 @@ int qMidasAPITest(int argc, char* argv[])
       receivedSpy.count() != 1)
     {
     std::cerr << "Failed to query 'midas.notafunction': "
-              << errorSpy.count() << " errors,"
+              << errorSpy.count() << " errors, "
               << receivedSpy.count() << " results." << std::endl;
     return EXIT_FAILURE;
     }
@@ -172,7 +172,7 @@ int qMidasAPITest(int argc, char* argv[])
       result.size() != 1 ||
       result.at(0)["queryError"].isNull())
     {
-    std::cout << "Failed to query 'midas.info'."
+    std::cout << "Failed to query 'midas.info'. Got "
               << result.size() << " results."
               << std::endl;
     return EXIT_FAILURE;
@@ -192,7 +192,7 @@ int qMidasAPITest(int argc, char* argv[])
       result.size() != 1 ||
       result.at(0)["queryError"].isNull())
     {
-    std::cout << "Failed to query 'midas.login'."
+    std::cout << "Failed to query 'midas.login'. Got "
               << result.size() << " results."
               << std::endl;
     return EXIT_FAILURE;
