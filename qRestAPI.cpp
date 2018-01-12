@@ -198,6 +198,7 @@ void qRestAPIPrivate::processReply(QNetworkReply* reply)
   QUuid queryId(reply->property("uuid").toString());
 
   qRestResult* restResult = results[queryId];
+  Q_ASSERT(restResult);
 
   if (reply->error() != QNetworkReply::NoError)
     {
