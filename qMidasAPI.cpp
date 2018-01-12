@@ -151,7 +151,10 @@ QUrl qMidasAPI::createUrl(const QString& method, const qRestAPI::Parameters& par
 void qMidasAPI::parseResponse(qRestResult* restResult, const QByteArray& response)
 {
   Q_D(qMidasAPI);
-  QScriptValue scriptValue = d->ScriptEngine.evaluate("(" + QString(response) + ")");
+  QScriptValue scriptValue = d->ScriptEngine
+                                .evaluate("JSON.parse")
+                                .call(QScriptValue(),
+                                      QScriptValueList() << QString(response));
 
   QUuid queryId = restResult->queryId();
 
