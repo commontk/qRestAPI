@@ -55,6 +55,7 @@ int qMidasAPITest(int argc, char* argv[])
   // --------------------------------------------------------------------------
   // Check that query associated with local file release file handle
   // --------------------------------------------------------------------------
+  std::cout << "\n=== Check that query associated with local file release file handle ===" << std::endl;
   QDir tmp = QDir::temp();
   QString temporaryDirName =
         QString("qMidasAPITest1-queryFile.%1").arg(QTime::currentTime().toString("hhmmsszzz"));
@@ -108,8 +109,9 @@ int qMidasAPITest(int argc, char* argv[])
     }
 
   // --------------------------------------------------------------------------
-  // Successfull query: midas.version
+  // Successful query: midas.version
   // --------------------------------------------------------------------------
+  std::cout << "\n=== Successful query: midas.version ===" << std::endl;
   QSignalSpy errorSpy(&midasAPI, SIGNAL(errorReceived(QUuid,QString)));
   QSignalSpy receivedSpy(&midasAPI, SIGNAL(resultReceived(QUuid,QList<QVariantMap>)));
   QUuid queryUuid = midasAPI.get("midas.version");
@@ -122,7 +124,7 @@ int qMidasAPITest(int argc, char* argv[])
       receivedSpy.count() != 1)
     {
     std::cerr << "Failed to query 'midas.version': "
-              << errorSpy.count() << " errors,"
+              << errorSpy.count() << " errors, "
               << receivedSpy.count() << " results." << std::endl;
     return EXIT_FAILURE;
     }
@@ -132,6 +134,7 @@ int qMidasAPITest(int argc, char* argv[])
   // --------------------------------------------------------------------------
   // Fail query: midas.notafunction
   // --------------------------------------------------------------------------
+  std::cout << "\n=== Fail query: midas.notafunction ===" << std::endl;
   queryUuid = midasAPI.get("midas.notafunction");
 
   // Give 5 seconds for the server to answer
@@ -143,7 +146,7 @@ int qMidasAPITest(int argc, char* argv[])
       receivedSpy.count() != 1)
     {
     std::cerr << "Failed to query 'midas.notafunction': "
-              << errorSpy.count() << " errors,"
+              << errorSpy.count() << " errors, "
               << receivedSpy.count() << " results." << std::endl;
     return EXIT_FAILURE;
     }
@@ -151,6 +154,7 @@ int qMidasAPITest(int argc, char* argv[])
   // --------------------------------------------------------------------------
   // Synchronous query: midas.info
   // --------------------------------------------------------------------------
+  std::cout << "\n=== Synchronous query: midas.info ===" << std::endl;
   ok = false;
   result  = qMidasAPI::synchronousQuery(ok, midasUrl, "midas.info");
   std::cout << "result: " <<
@@ -165,6 +169,7 @@ int qMidasAPITest(int argc, char* argv[])
   // --------------------------------------------------------------------------
   // Synchronous fail query: midas.notafunction
   // --------------------------------------------------------------------------
+  std::cout << "\n=== Synchronous fail query: midas.notafunction ===" << std::endl;
   result= qMidasAPI::synchronousQuery(ok, midasUrl,"midas.notafunction");
   std::cout << "result: " <<
     qPrintable(qMidasAPI::qVariantMapListToString(result))<< std::endl;
@@ -172,7 +177,7 @@ int qMidasAPITest(int argc, char* argv[])
       result.size() != 1 ||
       result.at(0)["queryError"].isNull())
     {
-    std::cout << "Failed to query 'midas.info'."
+    std::cout << "Failed to query 'midas.info'. Got "
               << result.size() << " results."
               << std::endl;
     return EXIT_FAILURE;
@@ -181,6 +186,7 @@ int qMidasAPITest(int argc, char* argv[])
   // --------------------------------------------------------------------------
   // Synchronous fail query: midas.login (wrong credentials)
   // --------------------------------------------------------------------------
+  std::cout << "\n=== Synchronous fail query: midas.login (wrong credentials) ===" << std::endl;
   qMidasAPI::ParametersType wrongParameters;
   wrongParameters["appname"] = "qMidasAPITest";
   wrongParameters["email"] = "john.doe@mail.com";
@@ -192,7 +198,7 @@ int qMidasAPITest(int argc, char* argv[])
       result.size() != 1 ||
       result.at(0)["queryError"].isNull())
     {
-    std::cout << "Failed to query 'midas.login'."
+    std::cout << "Failed to query 'midas.login'. Got "
               << result.size() << " results."
               << std::endl;
     return EXIT_FAILURE;
@@ -201,6 +207,7 @@ int qMidasAPITest(int argc, char* argv[])
   // --------------------------------------------------------------------------
   // Synchronous query: midas.community.list (return array of data)
   // --------------------------------------------------------------------------
+  std::cout << "\n=== Synchronous query: midas.community.list (return array of data) ===" << std::endl;
   result= qMidasAPI::synchronousQuery(ok, midasUrl,"midas.community.list");
   std::cout << "result: " <<
     qPrintable(qMidasAPI::qVariantMapListToString(result))<< std::endl;

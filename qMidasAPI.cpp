@@ -164,7 +164,7 @@ void qMidasAPI::parseResponse(qRestResult* restResult, const QByteArray& respons
     {
     QString error = QString("Error while parsing outputs:") +
       " status: " + scriptValue.property("stat").toString() +
-      " code: " + scriptValue.property("code").toInteger() +
+      " code: " + QString::number(scriptValue.property("code").toInteger()) +
       " msg: " + scriptValue.property("message").toString();
     restResult->setError(error, ResponseParseError);
     emit errorReceived(queryId, error);
