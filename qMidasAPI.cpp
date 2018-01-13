@@ -21,6 +21,7 @@
 // Qt includes
 #include <QEventLoop>
 #include <QUrl>
+#include <QScopedPointer>
 #if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
 #include <QUrlQuery>
 #endif
@@ -29,20 +30,6 @@
 #include "qMidasAPI.h"
 #include "qMidasAPI_p.h"
 #include "qRestResult.h"
-
-// --------------------------------------------------------------------------
-void qMidasAPIResult::setResult(const QUuid& queryUuid, const QList<QVariantMap>& result)
-{
-  this->QueryUuid = queryUuid;
-  this->Result = result;
-}
-
-// --------------------------------------------------------------------------
-void qMidasAPIResult::setError(const QUuid& queryUuid, const QString& error)
-{
-  Q_UNUSED(queryUuid);
-  this->Error += error;
-}
 
 // --------------------------------------------------------------------------
 // qMidasAPIPrivate methods
@@ -97,33 +84,34 @@ QList<QVariantMap> qMidasAPI::synchronousQuery(
   restAPI.setServerUrl(serverUrl);
   restAPI.setTimeOut(maxWaitingTimeInMSecs);
   QUuid queryUuid = restAPI.get(method, parameters);
-  Q_UNUSED(queryUuid);
-  qMidasAPIResult queryResult;
-  QObject::connect(&restAPI, SIGNAL(resultReceived(QUuid,QList<QVariantMap>)),
-                   &queryResult, SLOT(setResult(QUuid,QList<QVariantMap>)));
-  QObject::connect(&restAPI, SIGNAL(errorReceived(QUuid,QString)),
-                   &queryResult, SLOT(setError(QUuid,QString)));
-  QEventLoop eventLoop;
-  QObject::connect(&restAPI, SIGNAL(resultReceived(QUuid,QList<QVariantMap>)),
-                   &eventLoop, SLOT(quit()));
-  // Time out will fire an error which will quit the event loop.
-  QObject::connect(&restAPI, SIGNAL(errorReceived(QUuid,QString)),
-                   &eventLoop, SLOT(quit()));
-  eventLoop.exec();
-  ok = queryResult.Error.isNull();
-  if (!ok)
+  
+  QList<QVariantMap> result;
+  ok = false;
+  QScopedPointer<qRestResult> restResult(restAPI.takeResult(queryUuid));
+  if(restResult)
+    {
+    result = restResult->results();
+    }
+  
+  if (restAPI.error() != qRestAPI::UnknownError)
     {
     QVariantMap map;
-    map["queryError"] = queryResult.Error;
-    queryResult.Result.push_front(map);
+    map["queryError"] = restAPI.errorString();
+    result.push_front(map);
     }
-  if (queryResult.Result.count() == 0)
+  else
+    {
+    ok = true;
+    }
+  
+  if (result.count() == 0)
     {
     QVariantMap map;
     map["queryError"] = tr("Unknown error");
-    queryResult.Result.push_front(map);
+    result.push_front(map);
     }
-  return queryResult.Result;
+
+  return result;
 }
 
 // --------------------------------------------------------------------------

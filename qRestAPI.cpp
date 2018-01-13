@@ -198,6 +198,7 @@ void qRestAPIPrivate::processReply(QNetworkReply* reply)
   QUuid queryId(reply->property("uuid").toString());
 
   qRestResult* restResult = results[queryId];
+  Q_ASSERT(restResult);
 
   if (reply->error() != QNetworkReply::NoError)
     {
@@ -216,7 +217,7 @@ void qRestAPIPrivate::processReply(QNetworkReply* reply)
     default:
       ;
       }
-    restResult->setError(queryId.toString() + ": "  +
+    restResult->setError(queryId.toString() + ": " +
                          QString::number(static_cast<int>(reply->error())) + ": " +
                          reply->errorString(),
                          errorCode);
@@ -528,7 +529,7 @@ QUuid qRestAPI::put(QIODevice *input, const QString &resource, const qRestAPI::P
     {
     QUuid uid = QUuid::createUuid();
     qRestResult* restResult = new qRestResult(uid);
-    restResult->setError(uid.toString() + ": "  +
+    restResult->setError(uid.toString() + ": " +
                          "Could not open file for upload!",
                          qRestAPI::FileError);
     d->results[uid] = restResult;

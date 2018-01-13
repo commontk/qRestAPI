@@ -45,18 +45,4 @@ public:
   qMidasAPIPrivate(qMidasAPI* object);
 };
 
-// --------------------------------------------------------------------------
-class qMidasAPIResult : public QObject
-{
-  Q_OBJECT
-public:
-  QUuid QueryUuid;
-  QList<QVariantMap> Result;
-  QString Error;
-
-public slots:
-  void setResult(const QUuid& queryUuid, const QList<QVariantMap>& result);
-  void setError(const QUuid& queryUuid, const QString& error);
-};
-
 #endif
