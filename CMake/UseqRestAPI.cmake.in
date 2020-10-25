@@ -1,5 +1,5 @@
 #
-# This module is provided as qCDashAPI_USE_FILE by qCDashAPIConfig.cmake.  It can
+# This module is provided as qRestAPI_USE_FILE by qRestAPIConfig.cmake.  It can
 # be INCLUDED in a project to load the needed compiler and linker
 # settings to use qRestAPI.
 #

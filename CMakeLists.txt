@@ -15,7 +15,8 @@ else()
   cmake_minimum_required(VERSION 2.8.2)
 endif()
 
-project(qRestAPI)
+cmake_policy(SET CMP0048 NEW)
+project(qRestAPI VERSION 0.1 )
 
 option(BUILD_SHARED_LIBS "Build shared library" ON)
 option(BUILD_TESTING "Test the project" ON)
@@ -69,6 +70,13 @@ if(qRestAPI_QT_VERSION VERSION_GREATER "4")
 else()
   target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES})
 endif()
+target_include_directories(
+  ${PROJECT_NAME}
+  PUBLIC
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+)
+
 
 # To fix compilation problem: relocation R_X86_64_32 against `a local symbol' can not be
 # used when making a shared object; recompile with -fPIC
@@ -81,4 +89,59 @@ if(BUILD_TESTING)
   add_subdirectory(Testing)
 endif()
 
+#-----------------------------------------------------------------------------
+# Installation (https://github.com/forexample/package-example)
+include( GNUInstallDirs )
+set(config_install_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
+install( FILES ${CMAKE_CURRENT_BINARY_DIR}/UseqRestAPI.cmake DESTINATION ${config_install_dir} )
+
+set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
+set(version_config "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake")
+set(project_config "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake")
+set(targets_export_name "${PROJECT_NAME}Targets")
+set(namespace "${PROJECT_NAME}::")
+
+# Include module with function 'write_basic_package_version_file'
+include(CMakePackageConfigHelpers)
+
+# Configure '<PROJECT-NAME>ConfigVersion.cmake'
+# Use:
+#   * PROJECT_VERSION
+write_basic_package_version_file(
+  "${version_config}" COMPATIBILITY SameMajorVersion
+)
+
+# Configure '<PROJECT-NAME>Config.cmake'
+# Use variables:
+#   * targets_export_name
+#   * PROJECT_NAME
+configure_package_config_file(
+  "CMake/qRestAPIConfig.cmake.in"
+  "${project_config}"
+  INSTALL_DESTINATION "${config_install_dir}"
+  NO_CHECK_REQUIRED_COMPONENTS_MACRO
+)
+
+install(
+    FILES "${project_config}" "${version_config}"
+    DESTINATION "${config_install_dir}"
+)
+
+install(
+    EXPORT "${targets_export_name}"
+    NAMESPACE "${namespace}"
+    DESTINATION "${config_install_dir}"
+)
+
+install(
+  TARGETS ${PROJECT_NAME}
+  EXPORT ${targets_export_name}
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)
+
+install( FILES ${KIT_MOC_SRCS} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/${PROJECT_NAME} )
+
 include(CMake/GenerateqRestAPIConfig.cmake)
+
