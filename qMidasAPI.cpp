@@ -59,18 +59,6 @@ qMidasAPI::~qMidasAPI()
 }
 
 // --------------------------------------------------------------------------
-QString qMidasAPI::midasUrl()const
-{
-  return Superclass::serverUrl();
-}
-
-// --------------------------------------------------------------------------
-void qMidasAPI::setMidasUrl(const QString& newMidasUrl)
-{
-  Superclass::setServerUrl(newMidasUrl);
-}
-
-// --------------------------------------------------------------------------
 QUrl qMidasAPI::createUrl(const QString& method, const qRestAPI::Parameters& parameters)
 {
   QString responseType = "json";

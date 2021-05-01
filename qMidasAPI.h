@@ -43,18 +43,12 @@ class qMidasAPIPrivate;
 class qRestAPI_EXPORT qMidasAPI : public qRestAPI
 {
   Q_OBJECT
-  /// Url of the Midas server. e.g. "http://slicer.kitware.com/midas3"
-  /// @deprecated Use the serverUrl property
-  Q_PROPERTY(QString midasUrl READ midasUrl WRITE setMidasUrl)
 
   typedef qRestAPI Superclass;
 
 public:
   explicit qMidasAPI(QObject*parent = 0);
   virtual ~qMidasAPI();
-
-  QString midasUrl()const;
-  void setMidasUrl(const QString& newMidasUrl);
 
 signals:
   void errorReceived(QUuid queryId, QString error);

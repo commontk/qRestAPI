@@ -96,10 +96,12 @@ int qMidasAPITest(int argc, char* argv[])
     }
 
   // --------------------------------------------------------------------------
+  // Set serverURL used in remaining of the tests
+  // --------------------------------------------------------------------------
   QString midasUrl("http://slicer.kitware.com/midas3");
-  midasAPI.setMidasUrl(midasUrl);
 
-  if (midasAPI.midasUrl() != midasUrl)
+  midasAPI.setServerUrl(midasUrl);
+  if (midasAPI.serverUrl() != midasUrl)
     {
     std::cout << "Failed to set Midas Url" << std::endl;
     return EXIT_FAILURE;
