@@ -88,6 +88,7 @@ void qMidasAPI::parseResponse(qRestResult* restResult, const QByteArray& respons
       " msg: " + scriptValue.property("message").toString();
     restResult->setError(error, ResponseParseError);
     emit errorReceived(queryId, error);
+    return;
     }
   QScriptValue data = scriptValue.property("data");
   if (!data.isObject())
@@ -102,6 +103,7 @@ void qMidasAPI::parseResponse(qRestResult* restResult, const QByteArray& respons
       restResult->setError(QString("Bad data: ") + data.toString(), ResponseParseError);
       emit errorReceived(queryId, QString("Bad data: ") + data.toString());
       }
+    return;
     }
   QList<QVariantMap> result;
   if (data.isArray())
