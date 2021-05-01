@@ -25,7 +25,6 @@
 
 #include "qRestAPI_Export.h"
 
-class qMidasAPIPrivate;
 
 /// qMidasAPI is a simple interface class to communicate with a Midas3 public
 /// API.
@@ -59,9 +58,6 @@ protected:
   void parseResponse(qRestResult* restResult, const QByteArray& response);
 
 private:
-  QScopedPointer<qMidasAPIPrivate> d_ptr;
-
-  Q_DECLARE_PRIVATE(qMidasAPI);
   Q_DISABLE_COPY(qMidasAPI);
 };
 

@@ -22,34 +22,22 @@
 #include <QEventLoop>
 #include <QUrl>
 #include <QScopedPointer>
+#include <QScriptEngine>
+#include <QScriptValue>
 #if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
 #include <QUrlQuery>
 #endif
 
 // qMidasAPI includes
 #include "qMidasAPI.h"
-#include "qMidasAPI_p.h"
 #include "qRestResult.h"
-
-// --------------------------------------------------------------------------
-// qMidasAPIPrivate methods
-
-// --------------------------------------------------------------------------
-qMidasAPIPrivate::qMidasAPIPrivate(qMidasAPI* object)
-  : Superclass(object)
-  , q_ptr(object)
-{
-  this->ResponseType = "json";
-}
 
 // --------------------------------------------------------------------------
 // qMidasAPI methods
 
 // --------------------------------------------------------------------------
 qMidasAPI::qMidasAPI(QObject* _parent)
-//  : Superclass(new qMidasAPIPrivate(this), _parent)
   : Superclass(_parent)
-  , d_ptr(new qMidasAPIPrivate(this))
 {
 }
 
@@ -82,8 +70,8 @@ QUrl qMidasAPI::createUrl(const QString& method, const qRestAPI::Parameters& par
 // --------------------------------------------------------------------------
 void qMidasAPI::parseResponse(qRestResult* restResult, const QByteArray& response)
 {
-  Q_D(qMidasAPI);
-  QScriptValue scriptValue = d->ScriptEngine
+  QScriptEngine scriptEngine;
+  QScriptValue scriptValue = scriptEngine
                                 .evaluate("JSON.parse")
                                 .call(QScriptValue(),
                                       QScriptValueList() << QString(response));
