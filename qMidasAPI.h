@@ -53,24 +53,8 @@ public:
   explicit qMidasAPI(QObject*parent = 0);
   virtual ~qMidasAPI();
 
-  /// @deprecated Use qRestAPI::Parameters.
-  typedef Parameters ParametersType;
-
   QString midasUrl()const;
   void setMidasUrl(const QString& newMidasUrl);
-
-  /// Utility function that waits \a maxWaitingTimeInMSecs msecs for the result
-  /// of the query. Returns the answer of the server or an empty map if the
-  /// result failed.
-  /// If an error is emitted, "queryError" is added to the output.
-  /// Internally, a QEventLoop is used so it can have side effects on your
-  /// application.
-  /// @deprecated Use the non-static version from qRestAPI.
-  static QList<QVariantMap> synchronousQuery(bool &ok,
-    const QString& midasUrl,
-    const QString& method,
-    const ParametersType& parameters = ParametersType(),
-    int maxWaitingTimeInMSecs = 2500);
 
 signals:
   void errorReceived(QUuid queryId, QString error);

@@ -71,50 +71,6 @@ void qMidasAPI::setMidasUrl(const QString& newMidasUrl)
 }
 
 // --------------------------------------------------------------------------
-QList<QVariantMap> qMidasAPI::synchronousQuery(
-  bool &ok,
-  const QString& serverUrl,
-  const QString& method,
-  const ParametersType& parameters,
-  int maxWaitingTimeInMSecs)
-{
-  Q_UNUSED(method);
-  Q_UNUSED(parameters);
-  qMidasAPI restAPI;
-  restAPI.setServerUrl(serverUrl);
-  restAPI.setTimeOut(maxWaitingTimeInMSecs);
-  QUuid queryUuid = restAPI.get(method, parameters);
-  
-  QList<QVariantMap> result;
-  ok = false;
-  QScopedPointer<qRestResult> restResult(restAPI.takeResult(queryUuid));
-  if(restResult)
-    {
-    result = restResult->results();
-    }
-  
-  if (restAPI.error() != qRestAPI::UnknownError)
-    {
-    QVariantMap map;
-    map["queryError"] = restAPI.errorString();
-    result.push_front(map);
-    }
-  else
-    {
-    ok = true;
-    }
-  
-  if (result.count() == 0)
-    {
-    QVariantMap map;
-    map["queryError"] = tr("Unknown error");
-    result.push_front(map);
-    }
-
-  return result;
-}
-
-// --------------------------------------------------------------------------
 QUrl qMidasAPI::createUrl(const QString& method, const qRestAPI::Parameters& parameters)
 {
   QString responseType = "json";
