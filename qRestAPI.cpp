@@ -242,6 +242,8 @@ void qRestAPIPrivate::processReply(QNetworkReply* reply)
 
   reply->close();
   reply->deleteLater();
+
+  q->emit finished(queryId);
 }
 
 void qRestAPIPrivate::onSslErrors(QNetworkReply* reply, const QList<QSslError>& errors)

@@ -49,6 +49,9 @@ private slots:
   void testTakeResult();
   void testSync();
   void testReturnArrayOfData();
+
+  void testFinishedSignal_data();
+  void testFinishedSignal();
 private:
   QString LastTestResult;
 };
@@ -213,6 +216,38 @@ void qMidasAPITester::testReturnArrayOfData()
   this->LastTestResult = qMidasAPI::qVariantMapListToString(result);
 
   QVERIFY(result.size() > 0);
+}
+
+
+// --------------------------------------------------------------------------
+void qMidasAPITester::testFinishedSignal_data()
+{
+  QTest::addColumn<QString>("method");
+  QTest::addColumn<bool>("syncResult");
+
+  QTest::newRow("1") << "midas.info" << true;
+  QTest::newRow("2") << "midas.notafunction" << false;
+}
+
+// --------------------------------------------------------------------------
+void qMidasAPITester::testFinishedSignal()
+{
+  QFETCH(QString, method);
+  QFETCH(bool, syncResult);
+
+  qMidasAPI midasAPI;
+  midasAPI.setServerUrl("http://slicer.kitware.com/midas3");
+
+  QSignalSpy finishedSpy(&midasAPI, SIGNAL(finished(QUuid)));
+
+  QUuid queryUuid = midasAPI.get(method);
+  QCOMPARE(finishedSpy.count(), 0);
+
+  QList<QVariantMap> result;
+  QCOMPARE(midasAPI.sync(queryUuid, result), syncResult);
+  QCOMPARE(finishedSpy.count(), 1);
+
+  this->LastTestResult = qMidasAPI::qVariantMapListToString(result);
 }
 
 #define main qMidasAPITest
