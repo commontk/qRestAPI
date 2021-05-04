@@ -224,8 +224,8 @@ void qRestAPIPrivate::processReply(QNetworkReply* reply)
     }
   else
     {
-    QByteArray response = reply->readAll();
-    q->parseResponse(restResult, response);
+    restResult->Reponse = reply->readAll();
+    q->parseResponse(restResult, restResult->response());
     }
 
   #if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)

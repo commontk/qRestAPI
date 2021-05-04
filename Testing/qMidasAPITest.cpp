@@ -129,6 +129,7 @@ void qMidasAPITester::testTakeResult()
   QScopedPointer<qRestResult> restResult(midasAPI.takeResult(queryUuid));
 
   QVERIFY(!restResult.isNull());
+  QVERIFY(!restResult->response().isEmpty());
   QCOMPARE(restResult->results().size(), 1);
   QCOMPARE(errorSpy.count(), 0);
   QCOMPARE(receivedSpy.count(), 1);

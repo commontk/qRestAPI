@@ -89,6 +89,12 @@ QMap<QByteArray, QByteArray> qRestResult::rawHeaders() const
 }
 
 // --------------------------------------------------------------------------
+QByteArray qRestResult::response()const
+{
+  return this->Reponse;
+}
+
+// --------------------------------------------------------------------------
 void qRestResult::setResult()
 {
   this->done = true;

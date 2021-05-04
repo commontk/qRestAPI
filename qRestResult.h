@@ -37,6 +37,7 @@ class qRestAPI_EXPORT qRestResult : public QObject
   friend class qRestAPIPrivate;
 
   QUuid QueryId;
+  QByteArray Reponse;
   QList<QVariantMap> Result;
   QString Error;
   qRestAPI::ErrorType ErrorCode;
@@ -63,6 +64,8 @@ public:
 
   QByteArray rawHeader(const QByteArray& name) const;
   QMap<QByteArray, QByteArray> rawHeaders() const;
+
+  QByteArray response()const;
 
 public slots:
   void setResult();
