@@ -566,12 +566,14 @@ QUuid qRestAPI::upload(const QString& fileName, const QString& resource, const P
   return queryId;
 }
 
+// --------------------------------------------------------------------------
 bool qRestAPI::sync(const QUuid& queryId)
 {
   QList<QVariantMap> result;
   return this->sync(queryId, result);
 }
 
+// --------------------------------------------------------------------------
 bool qRestAPI::sync(const QUuid& queryId, QList<QVariantMap>& result)
 {
   Q_D(qRestAPI);
