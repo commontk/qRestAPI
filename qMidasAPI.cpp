@@ -68,15 +68,13 @@ QUrl qMidasAPI::createUrl(const QString& method, const qRestAPI::Parameters& par
 }
 
 // --------------------------------------------------------------------------
-void qMidasAPI::parseResponse(qRestResult* restResult, const QByteArray& response)
+bool qMidasAPI::parseMidasResponse(const QByteArray& response, QList<QVariantMap>& result, QString& error)
 {
   QScriptEngine scriptEngine;
   QScriptValue scriptValue = scriptEngine
                                 .evaluate("JSON.parse")
                                 .call(QScriptValue(),
                                       QScriptValueList() << QString(response));
-
-  QUuid queryId = restResult->queryId();
 
   // e.g. {"stat":"ok","code":"0","message":"","data":[{"p1":"v1","p2":"v2",...}]}
   QScriptValue stat = scriptValue.property("stat");
@@ -86,26 +84,23 @@ void qMidasAPI::parseResponse(qRestResult* restResult, const QByteArray& respons
       " status: " + scriptValue.property("stat").toString() +
       " code: " + QString::number(scriptValue.property("code").toInteger()) +
       " msg: " + scriptValue.property("message").toString();
-    restResult->setError(error, ResponseParseError);
-    emit errorReceived(queryId, error);
-    return;
+    return false;
     }
+
   QScriptValue data = scriptValue.property("data");
   if (!data.isObject())
     {
     if (data.toString().isEmpty())
       {
-      restResult->setError("No data", ResponseParseError);
-      emit errorReceived(queryId, "No data");
+      error = "No data";
       }
     else
       {
-      restResult->setError(QString("Bad data: ") + data.toString(), ResponseParseError);
-      emit errorReceived(queryId, QString("Bad data: ") + data.toString());
+      error = QString("Bad data: ") + data.toString();
       }
-    return;
+    return false;
     }
-  QList<QVariantMap> result;
+
   if (data.isArray())
     {
     quint32 length = data.property("length").toUInt32();
@@ -118,6 +113,36 @@ void qMidasAPI::parseResponse(qRestResult* restResult, const QByteArray& respons
     {
     qRestAPI::appendScriptValueToVariantMapList(result, data);
     }
-  restResult->setResult(result);
-  emit resultReceived(queryId, result);
+  return true;
+}
+
+// --------------------------------------------------------------------------
+bool qMidasAPI::parseMidasResponse(qRestResult* restResult, const QByteArray& response)
+{
+  QList<QVariantMap> result;
+  QString error;
+  bool success = qMidasAPI::parseMidasResponse(response, result, error);
+  if (success)
+    {
+    restResult->setResult(result);
+    }
+  else
+    {
+    restResult->setError(error, ResponseParseError);
+    }
+  return success;
+}
+
+// --------------------------------------------------------------------------
+void qMidasAPI::parseResponse(qRestResult* restResult, const QByteArray& response)
+{
+  bool success = qMidasAPI::parseMidasResponse(restResult, response);
+  if (success)
+    {
+    emit resultReceived(restResult->queryId(), restResult->results());
+    }
+  else
+    {
+    emit errorReceived(restResult->queryId(), restResult->error());
+    }
 }

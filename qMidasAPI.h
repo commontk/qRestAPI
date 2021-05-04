@@ -49,6 +49,30 @@ public:
   explicit qMidasAPI(QObject*parent = 0);
   virtual ~qMidasAPI();
 
+  /// Parse a Midas JSON \a response
+  ///
+  /// Response is expected to be formated like `{"stat":"ok","code":"0","message":"","data":[{"p1":"v1","p2":"v2",...}]}` or
+  /// `{"stat":"ok","code":"0","message":"","data":{"p1":"v1","p2":"v2",...}}`
+  ///
+  /// Returns \a False and set \a error in the following cases:
+  /// * If `stat` attribute value is different from `ok`, sets \a error to `Error while parsing outputs: status: {stat} code: {code} msg: {message}`
+  /// * If `data` attribute is empty, sets \a error to `No data`
+  /// * If `data` attribute is not a valid JSON object, sets \a error to `Bad data: {data}`
+  ///
+  /// Returns \a True and set \a result a list of `QVariantMap` if `data` attribute is either set to
+  /// an array of objects with attribute-value pairs or a single object with attribute-value pairs.
+  static bool parseMidasResponse(const QByteArray& response, QList<QVariantMap>& result, QString& error);
+
+  /// Parse a Midas JSON \a response
+  ///
+  /// If \a response is successfully parsed, set result and returns \a True otherwise
+  /// set error and returns \a False.
+  ///
+  /// \sa parseMidasResponse(const QByteArray& response, QList<QVariantMap>& result, QString& error)
+  /// \sa qRestResult::setResult(const QList<QVariantMap>& result)
+  /// \sa qRestResult::setError(const QString& error, qRestAPI::ErrorType errorType)
+  static bool parseMidasResponse(qRestResult* restResult, const QByteArray& response);
+
 signals:
   void errorReceived(QUuid queryId, QString error);
   void resultReceived(QUuid queryId, QList<QVariantMap> result);
