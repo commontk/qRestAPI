@@ -39,6 +39,8 @@ configure_file(
   )
 
 set(KIT_SRCS
+  qGirderAPI.cpp
+  qGirderAPI.h
   qMidasAPI.cpp
   qMidasAPI.h
   qRestAPI.cpp
@@ -49,6 +51,7 @@ set(KIT_SRCS
   )
 
 set(KIT_MOC_SRCS
+  qGirderAPI.h
   qMidasAPI.h
   qRestAPI.h
   qRestAPI_p.h
