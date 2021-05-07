@@ -192,6 +192,36 @@ void qRestAPI::appendScriptValueToVariantMapList(QList<QVariantMap>& result, con
 }
 
 // --------------------------------------------------------------------------
+QVariantMap qRestAPI::qVariantMapFlattened(const QVariantMap& map)
+{
+  QVariantMap output;
+  foreach(const QString& key, map.keys())
+    {
+    QVariant value = map.value(key);
+    if (value.canConvert<QVariantMap>())
+      {
+      value = QVariant::fromValue(QVariantList() << value.toMap());
+      }
+    if (value.canConvert<QVariantList>())
+      {
+      foreach(const QVariant& item, value.toList())
+        {
+        QVariantMap subMap = qRestAPI::qVariantMapFlattened(item.toMap());
+        foreach(const QString& subKey, subMap.keys())
+          {
+          output.insert(QString("%1.%2").arg(key).arg(subKey), subMap.value(subKey));
+          }
+        }
+      }
+    else
+      {
+      output.insert(key, value);
+      }
+    }
+  return output;
+}
+
+// --------------------------------------------------------------------------
 void qRestAPIPrivate::processReply(QNetworkReply* reply)
 {
   Q_Q(qRestAPI);

@@ -264,6 +264,54 @@ public:
   static QVariantMap scriptValueToMap(const QScriptValue& value);
   static void appendScriptValueToVariantMapList(QList<QVariantMap>& result, const QScriptValue& value);
 
+  /// \brief Flatten a QVariantMap of nested QVariantList, QVariantMap and QVariant.
+  ///
+  /// Given a dictionnary like the following:
+  ///
+  /// ```
+  /// {
+  ///   "a": "1",
+  ///   "b": {
+  ///     "b_a": "2-1",
+  ///     "b_b": "2-2",
+  ///     "b_c": "2-3"
+  ///   },
+  ///   "c": [
+  ///     {
+  ///       "c_a_1": "3-1_1",
+  ///       "c_b_1": "3-2_1",
+  ///       "c_c_1": "3-3_1"
+  ///     },
+  ///     {
+  ///       "c_a_2": "3-1_2",
+  ///       "c_b_2": "3-2_2"
+  ///     }
+  ///   ]
+  /// }
+  /// ```
+  ///
+  /// It returns this flattened dictionnary:
+  ///
+  /// ```
+  /// {
+  ///   "a": "1",
+  ///   "b.b_a": "2-1",
+  ///   "b.b_b": "2-2",
+  ///   "b.b_c": "2-3",
+  ///   "c.c_a_1": "3-1_1",
+  ///   "c.c_b_1": "3-2_1",
+  ///   "c.c_c_1": "3-3_1",
+  ///   "c.c_a_2": "3-1_2",
+  ///   "c.c_b_2": "3-2_2"
+  /// }
+  /// ```
+  ///
+  /// \warning In list of dictionnaries where the same key is found in multiple
+  /// dictionnaries, only the value associated associated with the key found in
+  /// the last list is kept.
+  ///
+  static QVariantMap qVariantMapFlattened(const QVariantMap& value);
+
 signals:
   void finished(const QUuid& queryId);
   void progress(const QUuid& queryId, double progress);

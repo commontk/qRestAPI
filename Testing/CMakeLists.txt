@@ -8,6 +8,7 @@ include_directories(
 set(KIT_TEST_SRCS
   qGirderAPITest.cpp
   qMidasAPITest.cpp
+  qRestAPITest.cpp
   )
 
 create_test_sourcelist(KIT_TESTDRIVER_SRCS qRestAPITests.cpp
@@ -42,3 +43,4 @@ endmacro()
 
 SIMPLE_TEST(qGirderAPITest)
 SIMPLE_TEST(qMidasAPITest)
+SIMPLE_TEST(qRestAPITest)
