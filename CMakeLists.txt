@@ -41,7 +41,6 @@ configure_file(
 set(KIT_SRCS
   qMidasAPI.cpp
   qMidasAPI.h
-  qMidasAPI_p.h
   qRestAPI.cpp
   qRestAPI.h
   qRestAPI_p.h
@@ -51,7 +50,6 @@ set(KIT_SRCS
 
 set(KIT_MOC_SRCS
   qMidasAPI.h
-  qMidasAPI_p.h
   qRestAPI.h
   qRestAPI_p.h
   qRestResult.h

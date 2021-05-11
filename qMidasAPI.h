@@ -25,7 +25,6 @@
 
 #include "qRestAPI_Export.h"
 
-class qMidasAPIPrivate;
 
 /// qMidasAPI is a simple interface class to communicate with a Midas3 public
 /// API.
@@ -43,9 +42,6 @@ class qMidasAPIPrivate;
 class qRestAPI_EXPORT qMidasAPI : public qRestAPI
 {
   Q_OBJECT
-  /// Url of the Midas server. e.g. "http://slicer.kitware.com/midas3"
-  /// @deprecated Use the serverUrl property
-  Q_PROPERTY(QString midasUrl READ midasUrl WRITE setMidasUrl)
 
   typedef qRestAPI Superclass;
 
@@ -53,24 +49,29 @@ public:
   explicit qMidasAPI(QObject*parent = 0);
   virtual ~qMidasAPI();
 
-  /// @deprecated Use qRestAPI::Parameters.
-  typedef Parameters ParametersType;
+  /// Parse a Midas JSON \a response
+  ///
+  /// Response is expected to be formated like `{"stat":"ok","code":"0","message":"","data":[{"p1":"v1","p2":"v2",...}]}` or
+  /// `{"stat":"ok","code":"0","message":"","data":{"p1":"v1","p2":"v2",...}}`
+  ///
+  /// Returns \a False and set \a error in the following cases:
+  /// * If `stat` attribute value is different from `ok`, sets \a error to `Error while parsing outputs: status: {stat} code: {code} msg: {message}`
+  /// * If `data` attribute is empty, sets \a error to `No data`
+  /// * If `data` attribute is not a valid JSON object, sets \a error to `Bad data: {data}`
+  ///
+  /// Returns \a True and set \a result a list of `QVariantMap` if `data` attribute is either set to
+  /// an array of objects with attribute-value pairs or a single object with attribute-value pairs.
+  static bool parseMidasResponse(const QByteArray& response, QList<QVariantMap>& result, QString& error);
 
-  QString midasUrl()const;
-  void setMidasUrl(const QString& newMidasUrl);
-
-  /// Utility function that waits \a maxWaitingTimeInMSecs msecs for the result
-  /// of the query. Returns the answer of the server or an empty map if the
-  /// result failed.
-  /// If an error is emitted, "queryError" is added to the output.
-  /// Internally, a QEventLoop is used so it can have side effects on your
-  /// application.
-  /// @deprecated Use the non-static version from qRestAPI.
-  static QList<QVariantMap> synchronousQuery(bool &ok,
-    const QString& midasUrl,
-    const QString& method,
-    const ParametersType& parameters = ParametersType(),
-    int maxWaitingTimeInMSecs = 2500);
+  /// Parse a Midas JSON \a response
+  ///
+  /// If \a response is successfully parsed, set result and returns \a True otherwise
+  /// set error and returns \a False.
+  ///
+  /// \sa parseMidasResponse(const QByteArray& response, QList<QVariantMap>& result, QString& error)
+  /// \sa qRestResult::setResult(const QList<QVariantMap>& result)
+  /// \sa qRestResult::setError(const QString& error, qRestAPI::ErrorType errorType)
+  static bool parseMidasResponse(qRestResult* restResult, const QByteArray& response);
 
 signals:
   void errorReceived(QUuid queryId, QString error);
@@ -81,9 +82,6 @@ protected:
   void parseResponse(qRestResult* restResult, const QByteArray& response);
 
 private:
-  QScopedPointer<qMidasAPIPrivate> d_ptr;
-
-  Q_DECLARE_PRIVATE(qMidasAPI);
   Q_DISABLE_COPY(qMidasAPI);
 };
 

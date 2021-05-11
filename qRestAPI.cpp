@@ -224,8 +224,8 @@ void qRestAPIPrivate::processReply(QNetworkReply* reply)
     }
   else
     {
-    QByteArray response = reply->readAll();
-    q->parseResponse(restResult, response);
+    restResult->Reponse = reply->readAll();
+    q->parseResponse(restResult, restResult->response());
     }
 
   #if QT_VERSION >= QT_VERSION_CHECK(4, 7, 0)
@@ -242,6 +242,8 @@ void qRestAPIPrivate::processReply(QNetworkReply* reply)
 
   reply->close();
   reply->deleteLater();
+
+  q->emit finished(queryId);
 }
 
 void qRestAPIPrivate::onSslErrors(QNetworkReply* reply, const QList<QSslError>& errors)
@@ -564,12 +566,14 @@ QUuid qRestAPI::upload(const QString& fileName, const QString& resource, const P
   return queryId;
 }
 
+// --------------------------------------------------------------------------
 bool qRestAPI::sync(const QUuid& queryId)
 {
   QList<QVariantMap> result;
   return this->sync(queryId, result);
 }
 
+// --------------------------------------------------------------------------
 bool qRestAPI::sync(const QUuid& queryId, QList<QVariantMap>& result)
 {
   Q_D(qRestAPI);

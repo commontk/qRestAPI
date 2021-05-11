@@ -24,6 +24,7 @@
 #include <QDir>
 #include <QSignalSpy>
 #include <QStringList>
+#include <QTest>
 #include <QTime>
 #include <QTimer>
 #include <QUrl>
@@ -31,31 +32,43 @@
 
 // qCDashAPI includes
 #include "qMidasAPI.h"
+#include "qRestResult.h"
 
 // STD includes
 #include <cstdlib>
 #include <iostream>
 
 // --------------------------------------------------------------------------
-void wait(int msec)
+class qMidasAPITester : public  QObject
 {
-  QEventLoop eventLoop;
-  QTimer::singleShot(msec, &eventLoop, SLOT(quit()));
-  eventLoop.exec();
+  Q_OBJECT
+private slots:
+  void cleanup();
+  void testQueryLocalFileReleaseFileHandle();
+  void testServerURL();
+  void testTakeResult();
+  void testSync();
+  void testReturnArrayOfData();
+
+  void testFinishedSignal_data();
+  void testFinishedSignal();
+private:
+  QString LastTestResult;
+};
+
+// --------------------------------------------------------------------------
+void qMidasAPITester::cleanup()
+{
+  if (QTest::currentTestFailed() && !this->LastTestResult.isEmpty())
+    {
+    qDebug() << QTest::currentTestFunction() << "result:" << this->LastTestResult;
+    }
+  this->LastTestResult.clear();
 }
 
 // --------------------------------------------------------------------------
-int qMidasAPITest(int argc, char* argv[])
+void qMidasAPITester::testQueryLocalFileReleaseFileHandle()
 {
-  QCoreApplication app(argc, argv);
-
-  bool ok = false;
-  QList<QVariantMap> result;
-
-  // --------------------------------------------------------------------------
-  // Check that query associated with local file release file handle
-  // --------------------------------------------------------------------------
-  std::cout << "\n=== Check that query associated with local file release file handle ===" << std::endl;
   QDir tmp = QDir::temp();
   QString temporaryDirName =
         QString("qMidasAPITest1-queryFile.%1").arg(QTime::currentTime().toString("hhmmsszzz"));
@@ -65,12 +78,7 @@ int qMidasAPITest(int argc, char* argv[])
   tmp.cd("api");
 
   QFile fileReply(tmp.filePath("json"));
-  if (!fileReply.open(QFile::WriteOnly))
-    {
-    std::cerr << "Line " << __LINE__ << " - Failed to create temporary file." 
-              << qPrintable(tmp.filePath("json")) << std::endl;
-    return EXIT_FAILURE;
-    }
+  QVERIFY2(fileReply.open(QFile::WriteOnly), qPrintable(QString("Failed to create temporary file. %1").arg(tmp.filePath("json"))));
 
   fileReply.write(
     QString("{\"stat\":\"ok\",\"code\":\"0\",\"message\":\"\",\"data\":{"
@@ -79,143 +87,172 @@ int qMidasAPITest(int argc, char* argv[])
             
   fileReply.close();
 
-  ok = false;
-  result = qMidasAPI::synchronousQuery(ok,
-    QUrl::fromLocalFile(QDir::temp().filePath(temporaryDirName)).toString(), "midas.quote.of.the.day");
-  std::cout << "result: " <<
-    qPrintable(qMidasAPI::qVariantMapListToString(result)) << std::endl;
-  if (!ok || result.size() == 0)
-    {
-    std::cout << "Failed to query 'midas.quote.of.the.day'." << std::endl;
-    return EXIT_FAILURE;
-    }
+  qMidasAPI midasAPI;
+  midasAPI.setServerUrl(QUrl::fromLocalFile(QDir::temp().filePath(temporaryDirName)).toString());
+
+  QUuid queryUuid = midasAPI.get("midas.quote.of.the.day");
+  QVERIFY(!queryUuid.isNull());
+
+  QList<QVariantMap> result;
+  QVERIFY(midasAPI.sync(queryUuid, result));
+  this->LastTestResult = qMidasAPI::qVariantMapListToString(result);
+
+  QCOMPARE(result.size(), 1);
 
   // Attempt to delete 'queryFile'
-  if (!QFile::remove(tmp.filePath("json")))
-    {
-    std::cout << "Failed to remove queryFile. [" << qPrintable(tmp.filePath("json")) << "]" << std::endl;
-    return EXIT_FAILURE;
-    }
+  QVERIFY2(QFile::remove(tmp.filePath("json")), qPrintable(QString("Failed to remove queryFile. [%1]").arg(tmp.filePath("json"))));
+}
 
-  // --------------------------------------------------------------------------
-  QString midasUrl("http://slicer.kitware.com/midas3");
+// --------------------------------------------------------------------------
+void qMidasAPITester::testServerURL()
+{
   qMidasAPI midasAPI;
-  midasAPI.setMidasUrl(midasUrl);
+  QString midasUrl("http://slicer.kitware.com/midas3");
+  midasAPI.setServerUrl(midasUrl);
+  QCOMPARE(midasAPI.serverUrl(), midasUrl);
+}
 
-  if (midasAPI.midasUrl() != midasUrl)
-    {
-    std::cout << "Failed to set Midas Url" << std::endl;
-    return EXIT_FAILURE;
-    }
+// --------------------------------------------------------------------------
+void qMidasAPITester::testTakeResult()
+{
+  qMidasAPI midasAPI;
+  midasAPI.setServerUrl("http://slicer.kitware.com/midas3");
 
-  // --------------------------------------------------------------------------
-  // Successful query: midas.version
-  // --------------------------------------------------------------------------
-  std::cout << "\n=== Successful query: midas.version ===" << std::endl;
   QSignalSpy errorSpy(&midasAPI, SIGNAL(errorReceived(QUuid,QString)));
   QSignalSpy receivedSpy(&midasAPI, SIGNAL(resultReceived(QUuid,QList<QVariantMap>)));
+
+  // Successful query: midas.version
+  {
   QUuid queryUuid = midasAPI.get("midas.version");
+  QVERIFY(!queryUuid.isNull());
 
-  // Give 5 seconds for the server to answer
-  wait(5000);
+  QScopedPointer<qRestResult> restResult(midasAPI.takeResult(queryUuid));
 
-  if (queryUuid.isNull() ||
-      errorSpy.count() > 0||
-      receivedSpy.count() != 1)
-    {
-    std::cerr << "Failed to query 'midas.version': "
-              << errorSpy.count() << " errors, "
-              << receivedSpy.count() << " results." << std::endl;
-    return EXIT_FAILURE;
-    }
+  QVERIFY(!restResult.isNull());
+  QVERIFY(!restResult->response().isEmpty());
+  QCOMPARE(restResult->results().size(), 1);
+  QCOMPARE(errorSpy.count(), 0);
+  QCOMPARE(receivedSpy.count(), 1);
+  }
+
   errorSpy.clear();
   receivedSpy.clear();
+  this->LastTestResult.clear();
 
-  // --------------------------------------------------------------------------
   // Fail query: midas.notafunction
-  // --------------------------------------------------------------------------
-  std::cout << "\n=== Fail query: midas.notafunction ===" << std::endl;
-  queryUuid = midasAPI.get("midas.notafunction");
+  {
+  QUuid queryUuid = midasAPI.get("midas.notafunction");
+  QVERIFY(!queryUuid.isNull());
 
-  // Give 5 seconds for the server to answer
-  wait(5000);
+  QScopedPointer<qRestResult> restResult(midasAPI.takeResult(queryUuid));
 
-  /// Even if errors are received, an empty result is sent
-  if (queryUuid.isNull() ||
-      errorSpy.count() == 0 ||
-      receivedSpy.count() != 1)
-    {
-    std::cerr << "Failed to query 'midas.notafunction': "
-              << errorSpy.count() << " errors, "
-              << receivedSpy.count() << " results." << std::endl;
-    return EXIT_FAILURE;
-    }
+  QVERIFY(restResult.isNull());
+  QCOMPARE(errorSpy.count(), 1);
+  QCOMPARE(receivedSpy.count(), 0);
+  }
+}
 
-  // --------------------------------------------------------------------------
+// --------------------------------------------------------------------------
+void qMidasAPITester::testSync()
+{
+  qMidasAPI midasAPI;
+  midasAPI.setServerUrl("http://slicer.kitware.com/midas3");
+
   // Synchronous query: midas.info
-  // --------------------------------------------------------------------------
-  std::cout << "\n=== Synchronous query: midas.info ===" << std::endl;
-  ok = false;
-  result  = qMidasAPI::synchronousQuery(ok, midasUrl, "midas.info");
-  std::cout << "result: " <<
-    qPrintable(qMidasAPI::qVariantMapListToString(result))<< std::endl;
-  if (!ok || result.size() == 0)
-    {
-    std::cout << "Failed to query 'midas.info'."
-              << std::endl;
-    return EXIT_FAILURE;
-    }
+  {
+  QUuid queryUuid = midasAPI.get("midas.info");
+  QVERIFY(!queryUuid.isNull());
 
-  // --------------------------------------------------------------------------
+  QList<QVariantMap> result;
+  QVERIFY(midasAPI.sync(queryUuid, result));
+  this->LastTestResult = qMidasAPI::qVariantMapListToString(result);
+
+  QCOMPARE(result.size(), 1);
+  }
+
   // Synchronous fail query: midas.notafunction
-  // --------------------------------------------------------------------------
-  std::cout << "\n=== Synchronous fail query: midas.notafunction ===" << std::endl;
-  result= qMidasAPI::synchronousQuery(ok, midasUrl,"midas.notafunction");
-  std::cout << "result: " <<
-    qPrintable(qMidasAPI::qVariantMapListToString(result))<< std::endl;
-  if (ok ||
-      result.size() != 1 ||
-      result.at(0)["queryError"].isNull())
-    {
-    std::cout << "Failed to query 'midas.info'. Got "
-              << result.size() << " results."
-              << std::endl;
-    return EXIT_FAILURE;
-    }
+  {
+  QUuid queryUuid = midasAPI.get("midas.notafunction");
+  QVERIFY(!queryUuid.isNull());
 
-  // --------------------------------------------------------------------------
+  QList<QVariantMap> result;
+  QVERIFY(!midasAPI.sync(queryUuid, result));
+  this->LastTestResult = qMidasAPI::qVariantMapListToString(result);
+
+  QCOMPARE(result.size(), 1);
+  QVERIFY(result.at(0).contains("queryError"));
+  }
+
   // Synchronous fail query: midas.login (wrong credentials)
-  // --------------------------------------------------------------------------
-  std::cout << "\n=== Synchronous fail query: midas.login (wrong credentials) ===" << std::endl;
-  qMidasAPI::ParametersType wrongParameters;
+  {
+  qRestAPI::Parameters wrongParameters;
   wrongParameters["appname"] = "qMidasAPITest";
   wrongParameters["email"] = "john.doe@mail.com";
   wrongParameters["apikey"] = "123456789";
-  result= qMidasAPI::synchronousQuery(ok, midasUrl,"midas.login", wrongParameters);
-  std::cout << "result: " <<
-    qPrintable(qMidasAPI::qVariantMapListToString(result))<< std::endl;
-  if (ok ||
-      result.size() != 1 ||
-      result.at(0)["queryError"].isNull())
-    {
-    std::cout << "Failed to query 'midas.login'. Got "
-              << result.size() << " results."
-              << std::endl;
-    return EXIT_FAILURE;
-    }
-    
-  // --------------------------------------------------------------------------
-  // Synchronous query: midas.community.list (return array of data)
-  // --------------------------------------------------------------------------
-  std::cout << "\n=== Synchronous query: midas.community.list (return array of data) ===" << std::endl;
-  result= qMidasAPI::synchronousQuery(ok, midasUrl,"midas.community.list");
-  std::cout << "result: " <<
-    qPrintable(qMidasAPI::qVariantMapListToString(result))<< std::endl;
-  if (!ok || result.size() == 0)
-    {
-    std::cout << "Failed to query 'midas.community.list'." << std::endl;
-    return EXIT_FAILURE;
-    }
 
-  return EXIT_SUCCESS;
+  QUuid queryUuid = midasAPI.get("midas.login", wrongParameters);
+  QVERIFY(!queryUuid.isNull());
+
+  QList<QVariantMap> result;
+  QVERIFY(!midasAPI.sync(queryUuid, result));
+  this->LastTestResult = qMidasAPI::qVariantMapListToString(result);
+
+  QCOMPARE(result.size(), 1);
+  QVERIFY(result.at(0).contains("queryError"));
+  }
 }
+
+// --------------------------------------------------------------------------
+void qMidasAPITester::testReturnArrayOfData()
+{
+  qMidasAPI midasAPI;
+  midasAPI.setServerUrl("http://slicer.kitware.com/midas3");
+
+  // Synchronous query: midas.community.list (return array of data)
+  QUuid queryUuid = midasAPI.get("midas.community.list");
+  QVERIFY(!queryUuid.isNull());
+
+  QList<QVariantMap> result;
+  QVERIFY(midasAPI.sync(queryUuid, result));
+  this->LastTestResult = qMidasAPI::qVariantMapListToString(result);
+
+  QVERIFY(result.size() > 0);
+}
+
+
+// --------------------------------------------------------------------------
+void qMidasAPITester::testFinishedSignal_data()
+{
+  QTest::addColumn<QString>("method");
+  QTest::addColumn<bool>("syncResult");
+
+  QTest::newRow("1") << "midas.info" << true;
+  QTest::newRow("2") << "midas.notafunction" << false;
+}
+
+// --------------------------------------------------------------------------
+void qMidasAPITester::testFinishedSignal()
+{
+  QFETCH(QString, method);
+  QFETCH(bool, syncResult);
+
+  qMidasAPI midasAPI;
+  midasAPI.setServerUrl("http://slicer.kitware.com/midas3");
+
+  QSignalSpy finishedSpy(&midasAPI, SIGNAL(finished(QUuid)));
+
+  QUuid queryUuid = midasAPI.get(method);
+  QCOMPARE(finishedSpy.count(), 0);
+
+  QList<QVariantMap> result;
+  QCOMPARE(midasAPI.sync(queryUuid, result), syncResult);
+  QCOMPARE(finishedSpy.count(), 1);
+
+  this->LastTestResult = qMidasAPI::qVariantMapListToString(result);
+}
+
+#define main qMidasAPITest
+QTEST_MAIN(qMidasAPITester)
+#undef main
+
+#include "moc_qMidasAPITest.cpp"
