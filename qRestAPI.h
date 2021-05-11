@@ -261,8 +261,78 @@ public:
   /// Mostly for debug purpose.
   static QString qVariantMapListToString(const QList<QVariantMap>& variants);
 
+  /// \brief Return an indented representation of a QVariant considering map and list.
+  ///
+  /// \example
+  ///
+  /// ```
+  /// a: 1
+  /// b:
+  ///   b_a: 2-1
+  ///   b_b: 2-2
+  ///   b_c: 2-3
+  /// c:
+  ///   0:
+  ///     c_a_1: 3-1_1
+  ///     c_b_1: 3-2_1
+  ///     c_c_1: 3-3_1
+  ///   1:
+  ///     c_a_2: 3-1_3
+  ///     c_b_2: 3-2_2
+  ///     c_b_3: 3-2_3
+  /// ```
+  static QString qVariantToString(const QVariant &value, int indent=0);
+
   static QVariantMap scriptValueToMap(const QScriptValue& value);
   static void appendScriptValueToVariantMapList(QList<QVariantMap>& result, const QScriptValue& value);
+
+  /// \brief Flatten a QVariantMap of nested QVariantList, QVariantMap and QVariant.
+  ///
+  /// Given a dictionnary like the following:
+  ///
+  /// ```
+  /// {
+  ///   "a": "1",
+  ///   "b": {
+  ///     "b_a": "2-1",
+  ///     "b_b": "2-2",
+  ///     "b_c": "2-3"
+  ///   },
+  ///   "c": [
+  ///     {
+  ///       "c_a_1": "3-1_1",
+  ///       "c_b_1": "3-2_1",
+  ///       "c_c_1": "3-3_1"
+  ///     },
+  ///     {
+  ///       "c_a_2": "3-1_2",
+  ///       "c_b_2": "3-2_2"
+  ///     }
+  ///   ]
+  /// }
+  /// ```
+  ///
+  /// It returns this flattened dictionnary:
+  ///
+  /// ```
+  /// {
+  ///   "a": "1",
+  ///   "b.b_a": "2-1",
+  ///   "b.b_b": "2-2",
+  ///   "b.b_c": "2-3",
+  ///   "c.c_a_1": "3-1_1",
+  ///   "c.c_b_1": "3-2_1",
+  ///   "c.c_c_1": "3-3_1",
+  ///   "c.c_a_2": "3-1_2",
+  ///   "c.c_b_2": "3-2_2"
+  /// }
+  /// ```
+  ///
+  /// \warning In list of dictionnaries where the same key is found in multiple
+  /// dictionnaries, only the value associated associated with the key found in
+  /// the last list is kept.
+  ///
+  static QVariantMap qVariantMapFlattened(const QVariantMap& value);
 
 signals:
   void finished(const QUuid& queryId);

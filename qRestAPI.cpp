@@ -192,6 +192,36 @@ void qRestAPI::appendScriptValueToVariantMapList(QList<QVariantMap>& result, con
 }
 
 // --------------------------------------------------------------------------
+QVariantMap qRestAPI::qVariantMapFlattened(const QVariantMap& map)
+{
+  QVariantMap output;
+  foreach(const QString& key, map.keys())
+    {
+    QVariant value = map.value(key);
+    if (value.canConvert<QVariantMap>())
+      {
+      value = QVariant::fromValue(QVariantList() << value.toMap());
+      }
+    if (value.canConvert<QVariantList>())
+      {
+      foreach(const QVariant& item, value.toList())
+        {
+        QVariantMap subMap = qRestAPI::qVariantMapFlattened(item.toMap());
+        foreach(const QString& subKey, subMap.keys())
+          {
+          output.insert(QString("%1.%2").arg(key).arg(subKey), subMap.value(subKey));
+          }
+        }
+      }
+    else
+      {
+      output.insert(key, value);
+      }
+    }
+  return output;
+}
+
+// --------------------------------------------------------------------------
 void qRestAPIPrivate::processReply(QNetworkReply* reply)
 {
   Q_Q(qRestAPI);
@@ -611,6 +641,41 @@ QString qRestAPI::qVariantMapListToString(const QList<QVariantMap>& list)
       }
     }
   return values.join("\n");
+}
+
+// --------------------------------------------------------------------------
+QString qRestAPI::qVariantToString(const QVariant &value, int indent)
+{
+  QString output;
+  bool isVariantList = value.canConvert<QVariantList>();
+  bool isVariantMap = value.canConvert<QVariantMap>();
+  if ((isVariantList || isVariantMap) && indent > 0)
+    {
+    output += "\n";
+    }
+  if (isVariantList)
+    {
+    QVariantList list = value.toList();
+    for(int idx=0; idx < list.count(); ++idx)
+      {
+      output.append(QString("%1%2: ").arg(QString(indent, ' ')).arg(idx));
+      output.append(qRestAPI::qVariantToString(list.at(idx), indent + 2));
+      }
+    }
+  else if (isVariantMap)
+    {
+    QVariantMap map = value.toMap();
+    foreach(const QString& key, map.keys())
+      {
+      output.append(QString("%1%2: ").arg(QString(indent, ' ')).arg(key));
+      output.append(qRestAPI::qVariantToString(map.value(key), indent + 2));
+      }
+    }
+  else
+    {
+    return value.toString() + "\n";
+    }
+  return output;
 }
 
 // --------------------------------------------------------------------------
