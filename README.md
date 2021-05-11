@@ -3,7 +3,16 @@
 qRestAPI is a cross-platform [Qt-based](https://www.qt.io/) library 
 allowing to easily query any [RESTful](https://en.wikipedia.org/wiki/Representational_state_transfer) web services. 
 
-It also provides a convenience interface to communicate with a [Midas](http://midas.kitware.com) server RESTful API.
+It provides the following interfaces:
+
+| Interface    | RESTful API      |
+|--------------| -----------------|
+| `qRestAPI`   | _any_            |
+| `qGirderAPI` | [Girder][girder] |
+| `qMidasAPI`  | [Midas][midas]   |
+
+[girder]: https://github.com/girder/girder
+[midas]: https://github.com/midasplatform/midas
 
 ## Prerequisites
 
@@ -23,15 +32,24 @@ It also provides a convenience interface to communicate with a [Midas](http://mi
     git clone git://github.com/commontk/qRestAPI.git
     mkdir qRestAPI-build
     cd qRestAPI-build
-    cmake -DQt5_DIR:PATH=/path/to/Qt5.9.1/5.9.1/gcc_64/lib/cmake/Qt5 ../qRestAPI
+    cmake -DQt5_DIR:PATH=/path/to/QtX.Y.Z/X.Y.Z/gcc_64/lib/cmake/Qt5 ../qRestAPI
     make -j4
 
 ## Testing
 
-To run the test `qMidasAPITest` checking that synchronous query can successfully be executed against http://slicer.kitware.com/midas3 server.
+To run tests checking that queries can successfully be executed.
 
     cd qRestAPI-build
     ctest
 
+List of tests expecting servers to be reachable:
+
+| Test             | Server                            |
+|------------------|-----------------------------------|
+| `qGirderAPITest` | https://data.kitware.com/api/v1   |
+| `qMidasAPITest`  | https://slicer.kitware.com/midas3 |
+
+
 ## Contribute
+
 Fork + pull.
