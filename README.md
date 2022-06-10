@@ -52,4 +52,8 @@ List of tests expecting servers to be reachable:
 
 ## Contribute
 
-Fork + pull.
+Contributions are welcome, and they are greatly appreciated! Every little bit helps, and credit will always be given.
+
+See [CONTRIBUTING.md][contributing] for more details.
+
+[contributing]: https://github.com/commontk/qRestAPI/blob/master/CONTRIBUTING.md
