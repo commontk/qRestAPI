@@ -10,26 +10,16 @@
 
 #include <QtCore/qglobal.h>
 
-#cmakedefine BUILD_SHARED_LIBS
-
-#if defined(BUILD_SHARED_LIBS)
-#  if defined(Q_OS_WIN) || defined(Q_OS_SYMBIAN)
-#    if defined(qRestAPI_EXPORTS)
-#      define qRestAPI_EXPORT Q_DECL_EXPORT
-#    else
-#      define qRestAPI_EXPORT Q_DECL_IMPORT
-#    endif
+#if defined(Q_OS_WIN) || defined(Q_OS_SYMBIAN)
+#  if defined(@PROJECT_NAME@_EXPORTS)
+#    define @PROJECT_NAME@_EXPORT Q_DECL_EXPORT
+#  else
+#    define @PROJECT_NAME@_EXPORT Q_DECL_IMPORT
 #  endif
-#else 
-#  define qRestAPI_EXPORT
 #endif
 
-#if !defined(qRestAPI_EXPORT)
-#  if defined(BUILD_SHARED_LIBS)
-#    define qRestAPI_EXPORT Q_DECL_EXPORT
-#  else
-#    define qRestAPI_EXPORT
-#  endif
+#if !defined(@PROJECT_NAME@_EXPORT)
+# define @PROJECT_NAME@_EXPORT Q_DECL_EXPORT
 #endif
 
 #endif
