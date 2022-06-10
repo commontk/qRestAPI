@@ -30,6 +30,12 @@ else()
   include(${QT_USE_FILE})
 endif()
 
+if(BUILD_SHARED_LIBS)
+  set(qRestAPI_STATIC OFF)
+else()
+  set(qRestAPI_STATIC ON)
+endif()
+
 configure_file(
   qRestAPI_Export.h.in
   ${CMAKE_CURRENT_BINARY_DIR}/qRestAPI_Export.h
