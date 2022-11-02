@@ -26,9 +26,11 @@
 #include <QStringList>
 #include <QTimer>
 #include <QUuid>
-#include <QScriptValueIterator>
 #if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#include <QJSValueIterator>
 #include <QUrlQuery>
+#else
+#include <QScriptValueIterator>
 #endif
 
 // qRestAPI includes
@@ -166,7 +168,11 @@ QNetworkReply* qRestAPI::sendRequest(QNetworkAccessManager::Operation operation,
 }
 
 // --------------------------------------------------------------------------
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+QVariantMap qRestAPI::scriptValueToMap(const QJSValue& value)
+#else
 QVariantMap qRestAPI::scriptValueToMap(const QScriptValue& value)
+#endif
 {
 #if QT_VERSION >= 0x040700
   return value.toVariant().toMap();
@@ -182,7 +188,11 @@ QVariantMap qRestAPI::scriptValueToMap(const QScriptValue& value)
 }
 
 // --------------------------------------------------------------------------
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+void qRestAPI::appendScriptValueToVariantMapList(QList<QVariantMap>& result, const QJSValue& data)
+#else
 void qRestAPI::appendScriptValueToVariantMapList(QList<QVariantMap>& result, const QScriptValue& data)
+#endif
 {
   QVariantMap map = scriptValueToMap(data);
   if (!map.isEmpty())
@@ -467,7 +477,7 @@ QUuid qRestAPI::get(const QString& resource, const Parameters& parameters, const
 {
   QUrl url = createUrl(resource, parameters);
   QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::GetOperation, url, rawHeaders);
-  QUuid queryId = queryReply->property("uuid").toString();
+  QUuid queryId(queryReply->property("uuid").toString());
   return queryId;
 }
 
@@ -530,7 +540,7 @@ QUuid qRestAPI::del(const QString& resource, const Parameters& parameters, const
 {
   QUrl url = createUrl(resource, parameters);
   QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::DeleteOperation, url, rawHeaders);
-  QUuid queryId = queryReply->property("uuid").toString();
+  QUuid queryId(queryReply->property("uuid").toString());
   return queryId;
 }
 
@@ -539,7 +549,7 @@ QUuid qRestAPI::post(const QString& resource, const Parameters& parameters, cons
 {
   QUrl url = createUrl(resource, parameters);
   QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::PostOperation, url, rawHeaders);
-  QUuid queryId = queryReply->property("uuid").toString();
+  QUuid queryId(queryReply->property("uuid").toString());
   return queryId;
 }
 
@@ -548,7 +558,7 @@ QUuid qRestAPI::put(const QString& resource, const Parameters& parameters, const
 {
   QUrl url = createUrl(resource, parameters);
   QNetworkReply* queryReply = sendRequest(QNetworkAccessManager::PutOperation, url, rawHeaders);
-  QUuid queryId = queryReply->property("uuid").toString();
+  QUuid queryId(queryReply->property("uuid").toString());
   return queryId;
 }
 
@@ -701,7 +711,7 @@ qRestResult* qRestAPI::takeResult(const QUuid& queryId)
       }
     }
   d->ErrorCode = UnknownUuidError;
-  d->ErrorString = UnknownUuidError;
+  d->ErrorString = QString::number(UnknownUuidError);
   return NULL;
 }
 

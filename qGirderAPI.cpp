@@ -19,8 +19,13 @@
 
 // Qt includes
 #include <QUrl>
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#include <QJSEngine>
+#include <QJSValue>
+#else
 #include <QScriptEngine>
 #include <QScriptValue>
+#endif
 
 // qRestAPI includes
 #include "qGirderAPI.h"
@@ -43,16 +48,26 @@ qGirderAPI::~qGirderAPI()
 // --------------------------------------------------------------------------
 bool qGirderAPI::parseGirderAPIv1Response(const QByteArray& response, QList<QVariantMap>& result)
 {
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+  QJSEngine scriptEngine;
+  QJSValue scriptValue = scriptEngine
+    .evaluate("JSON.parse")
+    .callWithInstance(QJSValue(), QJSValueList() << QString(response));
+#else
   QScriptEngine scriptEngine;
   QScriptValue scriptValue = scriptEngine
-                                .evaluate("JSON.parse")
-                                .call(QScriptValue(),
-                                      QScriptValueList() << QString(response));
+    .evaluate("JSON.parse")
+    .call(QScriptValue(), QScriptValueList() << QString(response));
+#endif
 
   // e.g. {["key1": "value1", ...]} or {"key1": "value1", ...}
   if (scriptValue.isArray())
     {
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+    quint32 length = scriptValue.property("length").toUInt();
+#else
     quint32 length = scriptValue.property("length").toUInt32();
+#endif
     for(quint32 i = 0; i < length; ++i)
       {
       qRestAPI::appendScriptValueToVariantMapList(result, scriptValue.property(i));

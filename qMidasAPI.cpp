@@ -22,10 +22,13 @@
 #include <QEventLoop>
 #include <QUrl>
 #include <QScopedPointer>
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#include <QJSEngine>
+#include <QJSValue>
+#include <QUrlQuery>
+#else
 #include <QScriptEngine>
 #include <QScriptValue>
-#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
-#include <QUrlQuery>
 #endif
 
 // qMidasAPI includes
@@ -70,24 +73,44 @@ QUrl qMidasAPI::createUrl(const QString& method, const qRestAPI::Parameters& par
 // --------------------------------------------------------------------------
 bool qMidasAPI::parseMidasResponse(const QByteArray& response, QList<QVariantMap>& result, QString& error)
 {
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+  QJSEngine scriptEngine;
+  QJSValue scriptValue = scriptEngine
+    .evaluate("JSON.parse")
+    .callWithInstance(QJSValue(), QJSValueList() << QString(response));
+
+  // e.g. {"stat":"ok","code":"0","message":"","data":[{"p1":"v1","p2":"v2",...}]}
+  QJSValue stat = scriptValue.property("stat");
+#else
   QScriptEngine scriptEngine;
   QScriptValue scriptValue = scriptEngine
-                                .evaluate("JSON.parse")
-                                .call(QScriptValue(),
-                                      QScriptValueList() << QString(response));
+    .evaluate("JSON.parse")
+    .call(QScriptValue(), QScriptValueList() << QString(response));
 
   // e.g. {"stat":"ok","code":"0","message":"","data":[{"p1":"v1","p2":"v2",...}]}
   QScriptValue stat = scriptValue.property("stat");
+#endif
   if (stat.toString() != "ok")
     {
     QString error = QString("Error while parsing outputs:") +
       " status: " + scriptValue.property("stat").toString() +
-      " code: " + QString::number(scriptValue.property("code").toInteger()) +
-      " msg: " + scriptValue.property("message").toString();
+      " code: ";
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+    error += QString::number(scriptValue.property("code").toInt());
+#else
+    error += QString::number(scriptValue.property("code").toInteger());
+#endif
+
+    error += " msg: " + scriptValue.property("message").toString();
     return false;
     }
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+  QJSValue data = scriptValue.property("data");
+#else
   QScriptValue data = scriptValue.property("data");
+#endif
   if (!data.isObject())
     {
     if (data.toString().isEmpty())
@@ -103,7 +126,11 @@ bool qMidasAPI::parseMidasResponse(const QByteArray& response, QList<QVariantMap
 
   if (data.isArray())
     {
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+    quint32 length = data.property("length").toUInt();
+#else
     quint32 length = data.property("length").toUInt32();
+#endif
     for(quint32 i = 0; i < length; ++i)
       {
       qRestAPI::appendScriptValueToVariantMapList(result, data.property(i));

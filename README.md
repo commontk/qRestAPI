@@ -35,6 +35,14 @@ It provides the following interfaces:
     cmake -DQt5_DIR:PATH=/path/to/QtX.Y.Z/X.Y.Z/gcc_64/lib/cmake/Qt5 ../qRestAPI
     make -j4
 
+## How to build using Qt 6.x
+
+    git clone git://github.com/commontk/qRestAPI.git
+    mkdir qRestAPI-build
+    cd qRestAPI-build
+    cmake -DQT6_INSTALL_PREFIX:PATH=/path/to/QtX.Y.Z/X.Y.Z/gcc_64 ../qRestAPI
+    make -j4
+
 ## Testing
 
 To run tests checking that queries can successfully be executed.

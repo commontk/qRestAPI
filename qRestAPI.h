@@ -25,7 +25,11 @@
 #include <QObject>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+#include <QJSValue>
+#else
 #include <QScriptValue>
+#endif
 #include <QUuid>
 #include <QVariant>
 
@@ -283,8 +287,13 @@ public:
   /// ```
   static QString qVariantToString(const QVariant &value, int indent=0);
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5,0,0))
+  static QVariantMap scriptValueToMap(const QJSValue& value);
+  static void appendScriptValueToVariantMapList(QList<QVariantMap>& result, const QJSValue& value);
+#else
   static QVariantMap scriptValueToMap(const QScriptValue& value);
   static void appendScriptValueToVariantMapList(QList<QVariantMap>& result, const QScriptValue& value);
+#endif
 
   /// \brief Flatten a QVariantMap of nested QVariantList, QVariantMap and QVariant.
   ///
