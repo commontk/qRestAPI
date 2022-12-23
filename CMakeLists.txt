@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5.0)
+cmake_minimum_required(VERSION 3.16.3...3.19.7 FATAL_ERROR)
 
 project(qRestAPI)
 
@@ -6,29 +6,43 @@ set(CMAKE_INCLUDE_CURRENT_DIR 1)
 set(CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE 1)
 set(CMAKE_POSITION_INDEPENDENT_CODE 1)
 
+# --------------------------------------------------------------------------
+# Set directories
+# --------------------------------------------------------------------------
+#
+# CMake
+#
+set(${PROJECT_NAME}_CMAKE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
+set(CMAKE_MODULE_PATH ${qRestAPI_CMAKE_DIR} ${CMAKE_MODULE_PATH})
+#
+# Include
+#
+set(${PROJECT_NAME}_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
+  CACHE INTERNAL "${PROJECT_NAME} include dirs" FORCE)
+#
+# Library
+#
+set(${PROJECT_NAME}_LIBRARY_DIRS ${CMAKE_CURRENT_BINARY_DIR}
+  CACHE INTERNAL "${PROJECT_NAME} library dirs" FORCE)
+
+# --------------------------------------------------------------------------
+# Dependencies
+# --------------------------------------------------------------------------
+
+#
+# Qt5
+#
+set(QT5_INSTALL_PREFIX "" CACHE PATH "The install location of Qt5")
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QT5_INSTALL_PREFIX})
+
+set(qRestAPI_QT5_COMPONENTS Core Gui Network Script Test)
+find_package(Qt5 COMPONENTS ${qRestAPI_QT5_COMPONENTS} REQUIRED)
+
+# --------------------------------------------------------------------------
+# Options
+# --------------------------------------------------------------------------
 option(BUILD_SHARED_LIBS "Build shared library" ON)
 option(BUILD_TESTING "Test the project" ON)
-
-set(qRestAPI_QT_VERSION "4" CACHE STRING "Expected Qt version")
-mark_as_advanced(qRestAPI_QT_VERSION)
-set_property(CACHE qRestAPI_QT_VERSION PROPERTY STRINGS 4 5)
-if(NOT (qRestAPI_QT_VERSION VERSION_EQUAL "4" OR qRestAPI_QT_VERSION VERSION_EQUAL "5"))
-  message(FATAL_ERROR "Expected value for qRestAPI_QT_VERSION is either '4' or '5'")
-endif()
-
-if(qRestAPI_QT_VERSION VERSION_GREATER "4")
-  set(QT5_INSTALL_PREFIX "" CACHE PATH "The install location of Qt5")
-  set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QT5_INSTALL_PREFIX})
-endif()
-
-if(qRestAPI_QT_VERSION VERSION_GREATER "4")
-  set(qRestAPI_QT5_COMPONENTS Core Gui Network Script Test)
-  find_package(Qt5 COMPONENTS ${qRestAPI_QT5_COMPONENTS} REQUIRED)
-else()
-  # HACK: QtXml is required because of "http://www.richelbilderbeek.nl/CppLinkErrorUndefinedReferenceToQListData.htm"
-  find_package(Qt4 4.6.2 COMPONENTS QtCore QtGui QtNetwork QtScript QtXml QtTest REQUIRED)
-  include(${QT_USE_FILE})
-endif()
 
 if(BUILD_SHARED_LIBS)
   set(qRestAPI_STATIC OFF)
@@ -36,11 +50,41 @@ else()
   set(qRestAPI_STATIC ON)
 endif()
 
+# --------------------------------------------------------------------------
+# Configure headers
+# --------------------------------------------------------------------------
 configure_file(
   qRestAPI_Export.h.in
   ${CMAKE_CURRENT_BINARY_DIR}/qRestAPI_Export.h
   )
 
+# --------------------------------------------------------------------------
+# Install headers
+# --------------------------------------------------------------------------
+if(NOT DEFINED ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+  set(${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT ON)
+endif()
+
+if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+
+  if(NOT DEFINED ${PROJECT_NAME}_INSTALL_INCLUDE_DIR)
+    set(${PROJECT_NAME}_INSTALL_INCLUDE_DIR include/${PROJECT_NAME})
+  endif()
+
+  file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+  install(
+    FILES ${headers}
+    DESTINATION ${${PROJECT_NAME}_INSTALL_INCLUDE_DIR} COMPONENT Development)
+
+  file(GLOB headers "${CMAKE_CURRENT_BINARY_DIR}/*.h")
+  install(
+    FILES ${headers}
+    DESTINATION ${${PROJECT_NAME}_INSTALL_INCLUDE_DIR} COMPONENT Development)
+endif()
+
+# --------------------------------------------------------------------------
+# Sources
+# --------------------------------------------------------------------------
 set(KIT_SRCS
   qGirderAPI.cpp
   qGirderAPI.h
@@ -61,22 +105,66 @@ set(KIT_MOC_SRCS
   qRestResult.h
   )
 
-if(qRestAPI_QT_VERSION VERSION_GREATER "4")
-  qt5_wrap_cpp(KIT_MOC_OUTPUT ${KIT_MOC_SRCS})
-else()
-  QT4_WRAP_CPP(KIT_MOC_OUTPUT ${KIT_MOC_SRCS})
-endif()
+qt5_wrap_cpp(KIT_MOC_OUTPUT ${KIT_MOC_SRCS})
 
+# --------------------------------------------------------------------------
+# Build library
+# --------------------------------------------------------------------------
 add_library(${PROJECT_NAME} ${KIT_SRCS} ${KIT_MOC_OUTPUT})
-if(qRestAPI_QT_VERSION VERSION_GREATER "4")
-  target_link_libraries(${PROJECT_NAME} Qt5::Gui Qt5::Network Qt5::Script)
-else()
-  target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} Qt5::Gui Qt5::Network Qt5::Script)
+
+
+# --------------------------------------------------------------------------
+# Install library
+# --------------------------------------------------------------------------
+if(NOT DEFINED ${PROJECT_NAME}_INSTALL_BIN_DIR)
+  set(${PROJECT_NAME}_INSTALL_BIN_DIR bin)
+endif()
+if(NOT DEFINED ${PROJECT_NAME}_INSTALL_LIB_DIR)
+  set(${PROJECT_NAME}_INSTALL_LIB_DIR lib/${PROJECT_NAME})
 endif()
 
-include(CTest)
+install(TARGETS ${PROJECT_NAME}
+  RUNTIME DESTINATION ${${PROJECT_NAME}_INSTALL_BIN_DIR} COMPONENT RuntimeLibraries
+  LIBRARY DESTINATION ${${PROJECT_NAME}_INSTALL_LIB_DIR} COMPONENT RuntimeLibraries
+  ARCHIVE DESTINATION ${${PROJECT_NAME}_INSTALL_LIB_DIR} COMPONENT Development
+  )
+
+# --------------------------------------------------------------------------
+# Configure support files
+# --------------------------------------------------------------------------
+# Set qRestAPI_INSTALL_CMAKE_DIR
+if(NOT DEFINED ${PROJECT_NAME}_INSTALL_CMAKE_DIR)
+  set(${PROJECT_NAME}_INSTALL_CMAKE_DIR cmake/${PROJECT_NAME})
+endif()
+
+export(TARGETS qRestAPI FILE ${qRestAPI_BINARY_DIR}/qRestAPIExports.cmake)
+
+# Configure qRestAPIConfig.cmake
+configure_file(
+  ${qRestAPI_SOURCE_DIR}/qRestAPIConfig.cmake.in
+  ${qRestAPI_BINARY_DIR}/qRestAPIConfig.cmake @ONLY)
+
+# Configure qRestAPIConfig.cmake
+configure_file(
+  ${qRestAPI_SOURCE_DIR}/qRestAPIInstallConfig.cmake.in
+  ${qRestAPI_BINARY_DIR}/install/qRestAPIConfig.cmake @ONLY)
+
+# --------------------------------------------------------------------------
+# Install configuration files
+# --------------------------------------------------------------------------
+
+# Install qRestAPIConfig cmake files
+install(
+  FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/install/qRestAPIConfig.cmake
+  DESTINATION ${${PROJECT_NAME}_INSTALL_CMAKE_DIR} COMPONENT Development
+  )
+
+# --------------------------------------------------------------------------
+# Testing
+# --------------------------------------------------------------------------
 if(BUILD_TESTING)
+  include(CTest)
   add_subdirectory(Testing)
 endif()
-
-include(CMake/GenerateqRestAPIConfig.cmake)
