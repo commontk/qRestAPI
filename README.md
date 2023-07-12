@@ -16,7 +16,7 @@ It provides the following interfaces:
 
 ## Prerequisites
 
- * [Qt](https://www.qt.io/) 4.x or 5.x
+ * [Qt](https://www.qt.io/) 4.x, 5.x, or 6.x
  * [CMake](http://www.cmake.org)
 
 ## How to build using Qt 4.x
