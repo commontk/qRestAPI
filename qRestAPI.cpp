@@ -110,6 +110,11 @@ QNetworkReply* qRestAPI::sendRequest(QNetworkAccessManager::Operation operation,
   QNetworkRequest queryRequest;
   queryRequest.setUrl(url);
 
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+  // In Qt6, redirects are followed by default, but it has to be manually enabled in Qt5.
+  queryRequest.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+#endif 
+
   for (QMapIterator<QByteArray, QByteArray> it(d->DefaultRawHeaders); it.hasNext();)
     {
     it.next();
