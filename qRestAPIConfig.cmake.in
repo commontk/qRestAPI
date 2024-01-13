@@ -1,0 +1,5 @@
+include("${CMAKE_CURRENT_BINARY_DIR}/qRestAPIExports.cmake")
+
+set(qRestAPI_CMAKE_DIR "@qRestAPI_CMAKE_DIR@")
+set(qRestAPI_INCLUDE_DIRS "@qRestAPI_INCLUDE_DIRS@")
+set(qRestAPI_LIBRARY_DIRS "@qRestAPI_LIBRARY_DIRS@")
