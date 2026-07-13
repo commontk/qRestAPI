@@ -43,6 +43,32 @@ It provides the following interfaces:
     cmake -DQT6_INSTALL_PREFIX:PATH=/path/to/QtX.Y.Z/X.Y.Z/gcc_64 ../qRestAPI
     make -j4
 
+## Installing / packaging
+
+By default only the runtime library is installed. To also install the
+development files (headers, exported CMake targets and the package config
+file) — e.g. when building a package or a standalone install tree — set
+`qRestAPI_INSTALL_NO_DEVELOPMENT` to `OFF`:
+
+    cmake -DqRestAPI_INSTALL_NO_DEVELOPMENT=OFF -DCMAKE_INSTALL_PREFIX=/path/to/prefix ../qRestAPI
+    make install
+
+The install tree is relocatable. Downstream projects consume it with:
+
+    find_package(qRestAPI REQUIRED)
+    target_link_libraries(MyTarget PRIVATE qRestAPI)
+
+The following variables let a parent project (typically a superbuild) override
+the install layout; each defaults to a standalone-friendly value when unset:
+
+| Variable                          | Default              |
+|-----------------------------------|----------------------|
+| `qRestAPI_INSTALL_NO_DEVELOPMENT` | `ON`                 |
+| `qRestAPI_INSTALL_BIN_DIR`        | `bin`                |
+| `qRestAPI_INSTALL_LIB_DIR`        | `lib/qRestAPI`       |
+| `qRestAPI_INSTALL_INCLUDE_DIR`    | `include/qRestAPI`   |
+| `qRestAPI_INSTALL_CMAKE_DIR`      | `cmake/qRestAPI`     |
+
 ## Testing
 
 To run tests checking that queries can successfully be executed.
