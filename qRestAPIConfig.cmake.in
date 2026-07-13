@@ -1,5 +1,19 @@
-include("${CMAKE_CURRENT_BINARY_DIR}/qRestAPIExports.cmake")
+# qRestAPI package configuration file for use from a build tree.
+
+include("@CMAKE_CURRENT_BINARY_DIR@/qRestAPITargets.cmake")
+
+# Re-resolve the Qt dependency so the imported target is usable downstream.
+include(CMakeFindDependencyMacro)
+if("@qRestAPI_QT_VERSION@" VERSION_GREATER "4")
+  find_dependency(Qt@qRestAPI_QT_VERSION@ COMPONENTS @qRestAPI_QT_COMPONENTS@)
+else()
+  find_dependency(Qt4 COMPONENTS QtGui QtNetwork)
+endif()
 
 set(qRestAPI_CMAKE_DIR "@qRestAPI_CMAKE_DIR@")
+
+# Legacy variables (kept for backward compatibility; prefer the imported
+# qRestAPI target).
+set(qRestAPI_LIBRARIES qRestAPI)
 set(qRestAPI_INCLUDE_DIRS "@qRestAPI_INCLUDE_DIRS@")
 set(qRestAPI_LIBRARY_DIRS "@qRestAPI_LIBRARY_DIRS@")
