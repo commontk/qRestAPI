@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5.0)
+cmake_minimum_required(VERSION 3.16.3)
 
 project(qRestAPI)
 
@@ -12,10 +12,9 @@ set(CMAKE_POSITION_INDEPENDENT_CODE 1)
 # Directories
 # --------------------------------------------------------------------------
 #
-# CMake
+# CMake: holds the package-config templates (*Config.cmake.in).
 #
 set(${PROJECT_NAME}_CMAKE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
-set(CMAKE_MODULE_PATH ${qRestAPI_CMAKE_DIR} ${CMAKE_MODULE_PATH})
 #
 # Include
 #
@@ -51,11 +50,24 @@ if(NOT DEFINED ${PROJECT_NAME}_INSTALL_CMAKE_DIR)
   set(${PROJECT_NAME}_INSTALL_CMAKE_DIR cmake/${PROJECT_NAME})
 endif()
 
-# By default only runtime files are installed. Set to OFF to also install the
-# development files (headers, CMake package config, exported targets), e.g. when
-# creating a package or a standalone install tree.
-if(NOT DEFINED ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
-  set(${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT ON)
+# Install the development files (headers, CMake package config, exported
+# targets) in addition to the runtime library. OFF by default so a plain
+# install ships only the runtime; turn ON for packaging / standalone install
+# trees. (CMP0077 is NEW at this cmake_minimum_required, so a parent project may
+# still override this before add_subdirectory().)
+option(${PROJECT_NAME}_INSTALL_DEVELOPMENT
+  "Install ${PROJECT_NAME} development files (headers, CMake package config, exported targets)" OFF)
+
+# Backward compatibility: honor the deprecated, inverted
+# ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT if a consumer still sets it.
+if(DEFINED ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+  message(DEPRECATION
+    "${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT is deprecated; use ${PROJECT_NAME}_INSTALL_DEVELOPMENT (inverted value).")
+  if(${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+    set(${PROJECT_NAME}_INSTALL_DEVELOPMENT OFF CACHE BOOL "" FORCE)
+  else()
+    set(${PROJECT_NAME}_INSTALL_DEVELOPMENT ON CACHE BOOL "" FORCE)
+  endif()
 endif()
 
 # --------------------------------------------------------------------------
@@ -65,35 +77,27 @@ endif()
 #
 # Qt
 #
-set(qRestAPI_QT_VERSION "4" CACHE STRING "Expected Qt version")
-mark_as_advanced(qRestAPI_QT_VERSION)
-set_property(CACHE qRestAPI_QT_VERSION PROPERTY STRINGS 4 5 6)
-if(NOT (qRestAPI_QT_VERSION VERSION_EQUAL "4" OR qRestAPI_QT_VERSION VERSION_EQUAL "5" OR qRestAPI_QT_VERSION VERSION_EQUAL "6"))
-  message(FATAL_ERROR "Expected value for qRestAPI_QT_VERSION is either '4', '5' or '6'")
+set(${PROJECT_NAME}_QT_VERSION "5" CACHE STRING "Expected Qt version (5 or 6)")
+mark_as_advanced(${PROJECT_NAME}_QT_VERSION)
+set_property(CACHE ${PROJECT_NAME}_QT_VERSION PROPERTY STRINGS 5 6)
+if(NOT (${PROJECT_NAME}_QT_VERSION VERSION_EQUAL "5" OR ${PROJECT_NAME}_QT_VERSION VERSION_EQUAL "6"))
+  message(FATAL_ERROR "Expected value for ${PROJECT_NAME}_QT_VERSION is either '5' or '6'")
 endif()
 
-if(qRestAPI_QT_VERSION VERSION_GREATER "4")
-  set(QT${qRestAPI_QT_VERSION}_INSTALL_PREFIX "" CACHE PATH "The install location of Qt${qRestAPI_QT_VERSION}")
-  set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QT${qRestAPI_QT_VERSION}_INSTALL_PREFIX})
-endif()
+set(QT${${PROJECT_NAME}_QT_VERSION}_INSTALL_PREFIX "" CACHE PATH "The install location of Qt${${PROJECT_NAME}_QT_VERSION}")
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${QT${${PROJECT_NAME}_QT_VERSION}_INSTALL_PREFIX})
 
 # Qt components used through the public interface of the library. They are
 # recorded here so the generated package config can re-resolve them through
-# find_dependency() for downstream consumers.
-set(qRestAPI_QT_COMPONENTS Gui Network Qml)
-
-if(qRestAPI_QT_VERSION VERSION_GREATER "4")
-  find_package(Qt${qRestAPI_QT_VERSION} COMPONENTS Core ${qRestAPI_QT_COMPONENTS} Test REQUIRED)
-else()
-  # HACK: QtXml is required because of "http://www.richelbilderbeek.nl/CppLinkErrorUndefinedReferenceToQListData.htm"
-  find_package(Qt4 4.6.2 COMPONENTS QtCore QtGui QtNetwork QtScript QtXml QtTest REQUIRED)
-  include(${QT_USE_FILE})
-endif()
+# find_dependency() for downstream consumers. The Test component is required
+# only when building the tests (see Testing/CMakeLists.txt).
+set(${PROJECT_NAME}_QT_COMPONENTS Gui Network Qml)
+find_package(Qt${${PROJECT_NAME}_QT_VERSION} COMPONENTS Core ${${PROJECT_NAME}_QT_COMPONENTS} REQUIRED)
 
 if(BUILD_SHARED_LIBS)
-  set(qRestAPI_STATIC OFF)
+  set(${PROJECT_NAME}_STATIC OFF)
 else()
-  set(qRestAPI_STATIC ON)
+  set(${PROJECT_NAME}_STATIC ON)
 endif()
 
 # --------------------------------------------------------------------------
@@ -124,12 +128,10 @@ set(KIT_MOC_SRCS
   qRestResult.h
   )
 
-if(qRestAPI_QT_VERSION VERSION_GREATER "5")
+if(${PROJECT_NAME}_QT_VERSION VERSION_GREATER "5")
   qt_wrap_cpp(KIT_MOC_OUTPUT ${KIT_MOC_SRCS})
-elseif(qRestAPI_QT_VERSION VERSION_GREATER "4")
-  qt5_wrap_cpp(KIT_MOC_OUTPUT ${KIT_MOC_SRCS})
 else()
-  QT4_WRAP_CPP(KIT_MOC_OUTPUT ${KIT_MOC_SRCS})
+  qt5_wrap_cpp(KIT_MOC_OUTPUT ${KIT_MOC_SRCS})
 endif()
 
 # --------------------------------------------------------------------------
@@ -145,20 +147,16 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   $<INSTALL_INTERFACE:${${PROJECT_NAME}_INSTALL_INCLUDE_DIR}>
   )
 
-if(qRestAPI_QT_VERSION VERSION_GREATER "4")
-  target_link_libraries(${PROJECT_NAME} PUBLIC
-    Qt${qRestAPI_QT_VERSION}::Gui
-    Qt${qRestAPI_QT_VERSION}::Network
-    Qt${qRestAPI_QT_VERSION}::Qml)
-else()
-  target_link_libraries(${PROJECT_NAME} PUBLIC ${QT_LIBRARIES})
-endif()
+target_link_libraries(${PROJECT_NAME} PUBLIC
+  Qt${${PROJECT_NAME}_QT_VERSION}::Gui
+  Qt${${PROJECT_NAME}_QT_VERSION}::Network
+  Qt${${PROJECT_NAME}_QT_VERSION}::Qml)
 
 # --------------------------------------------------------------------------
 # Export targets for a build tree
 # --------------------------------------------------------------------------
 export(TARGETS ${PROJECT_NAME}
-  FILE ${qRestAPI_BINARY_DIR}/qRestAPITargets.cmake)
+  FILE ${CMAKE_CURRENT_BINARY_DIR}/qRestAPITargets.cmake)
 
 # --------------------------------------------------------------------------
 # Install library
@@ -174,16 +172,17 @@ install(TARGETS ${PROJECT_NAME}
 # Configure package config file for the build tree
 # --------------------------------------------------------------------------
 configure_file(
-  ${qRestAPI_SOURCE_DIR}/qRestAPIConfig.cmake.in
-  ${qRestAPI_BINARY_DIR}/qRestAPIConfig.cmake @ONLY)
+  ${${PROJECT_NAME}_CMAKE_DIR}/qRestAPIConfig.cmake.in
+  ${CMAKE_CURRENT_BINARY_DIR}/qRestAPIConfig.cmake @ONLY)
 
 # --------------------------------------------------------------------------
 # Install development files
 # --------------------------------------------------------------------------
-if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
+if(${PROJECT_NAME}_INSTALL_DEVELOPMENT)
 
-  # Headers
+  # Public headers (exclude private *_p.h headers)
   file(GLOB headers "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+  list(FILTER headers EXCLUDE REGEX "_p\\.h$")
   install(
     FILES ${headers}
     DESTINATION ${${PROJECT_NAME}_INSTALL_INCLUDE_DIR} COMPONENT Development)
@@ -196,14 +195,14 @@ if(NOT ${PROJECT_NAME}_INSTALL_NO_DEVELOPMENT)
   # Relocatable package config file for the install tree
   include(CMakePackageConfigHelpers)
   configure_package_config_file(
-    ${qRestAPI_SOURCE_DIR}/qRestAPIInstallConfig.cmake.in
-    ${qRestAPI_BINARY_DIR}/install/qRestAPIConfig.cmake
+    ${${PROJECT_NAME}_CMAKE_DIR}/qRestAPIInstallConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/install/qRestAPIConfig.cmake
     INSTALL_DESTINATION ${${PROJECT_NAME}_INSTALL_CMAKE_DIR}
     PATH_VARS ${PROJECT_NAME}_INSTALL_INCLUDE_DIR ${PROJECT_NAME}_INSTALL_LIB_DIR
     )
 
   install(
-    FILES ${qRestAPI_BINARY_DIR}/install/qRestAPIConfig.cmake
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/install/qRestAPIConfig.cmake
     DESTINATION ${${PROJECT_NAME}_INSTALL_CMAKE_DIR} COMPONENT Development)
 
   # Exported targets for the install tree

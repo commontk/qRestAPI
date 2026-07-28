@@ -1,14 +1,11 @@
 # qRestAPI package configuration file for use from a build tree.
 
-include("@CMAKE_CURRENT_BINARY_DIR@/qRestAPITargets.cmake")
-
-# Re-resolve the Qt dependency so the imported target is usable downstream.
+# Re-resolve the Qt dependency first, so the imported target's link interface
+# is satisfied for downstream consumers.
 include(CMakeFindDependencyMacro)
-if("@qRestAPI_QT_VERSION@" VERSION_GREATER "4")
-  find_dependency(Qt@qRestAPI_QT_VERSION@ COMPONENTS @qRestAPI_QT_COMPONENTS@)
-else()
-  find_dependency(Qt4 COMPONENTS QtGui QtNetwork)
-endif()
+find_dependency(Qt@qRestAPI_QT_VERSION@ COMPONENTS @qRestAPI_QT_COMPONENTS@)
+
+include("@CMAKE_CURRENT_BINARY_DIR@/qRestAPITargets.cmake")
 
 set(qRestAPI_CMAKE_DIR "@qRestAPI_CMAKE_DIR@")
 

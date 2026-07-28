@@ -16,16 +16,8 @@ It provides the following interfaces:
 
 ## Prerequisites
 
- * [Qt](https://www.qt.io/) 4.x, 5.x, or 6.x
+ * [Qt](https://www.qt.io/) 5.x or 6.x
  * [CMake](http://www.cmake.org)
-
-## How to build using Qt 4.x
-
-    git clone git://github.com/commontk/qRestAPI.git
-    mkdir qRestAPI-build
-    cd qRestAPI-build
-    cmake -DQT_QMAKE_EXECUTABLE:FILEPATH=/path/to/qmake ../qRestAPI
-    make -j4
 
 ## How to build using Qt 5.x
 
@@ -47,10 +39,10 @@ It provides the following interfaces:
 
 By default only the runtime library is installed. To also install the
 development files (headers, exported CMake targets and the package config
-file) — e.g. when building a package or a standalone install tree — set
-`qRestAPI_INSTALL_NO_DEVELOPMENT` to `OFF`:
+file) — e.g. when building a package or a standalone install tree — turn on
+`qRestAPI_INSTALL_DEVELOPMENT`:
 
-    cmake -DqRestAPI_INSTALL_NO_DEVELOPMENT=OFF -DCMAKE_INSTALL_PREFIX=/path/to/prefix ../qRestAPI
+    cmake -DqRestAPI_INSTALL_DEVELOPMENT=ON -DCMAKE_INSTALL_PREFIX=/path/to/prefix ../qRestAPI
     make install
 
 The install tree is relocatable. Downstream projects consume it with:
@@ -61,13 +53,13 @@ The install tree is relocatable. Downstream projects consume it with:
 The following variables let a parent project (typically a superbuild) override
 the install layout; each defaults to a standalone-friendly value when unset:
 
-| Variable                          | Default              |
-|-----------------------------------|----------------------|
-| `qRestAPI_INSTALL_NO_DEVELOPMENT` | `ON`                 |
-| `qRestAPI_INSTALL_BIN_DIR`        | `bin`                |
-| `qRestAPI_INSTALL_LIB_DIR`        | `lib/qRestAPI`       |
-| `qRestAPI_INSTALL_INCLUDE_DIR`    | `include/qRestAPI`   |
-| `qRestAPI_INSTALL_CMAKE_DIR`      | `cmake/qRestAPI`     |
+| Variable                       | Default            |
+|--------------------------------|--------------------|
+| `qRestAPI_INSTALL_DEVELOPMENT` | `OFF`              |
+| `qRestAPI_INSTALL_BIN_DIR`     | `bin`              |
+| `qRestAPI_INSTALL_LIB_DIR`     | `lib/qRestAPI`     |
+| `qRestAPI_INSTALL_INCLUDE_DIR` | `include/qRestAPI` |
+| `qRestAPI_INSTALL_CMAKE_DIR`   | `cmake/qRestAPI`   |
 
 ## Testing
 
