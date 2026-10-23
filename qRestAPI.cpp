@@ -216,11 +216,13 @@ QVariantMap qRestAPI::qVariantMapFlattened(const QVariantMap& map)
   foreach(const QString& key, map.keys())
     {
     QVariant value = map.value(key);
-    if (value.canConvert<QVariantMap>())
+    // Check the stored type rather than using canConvert(): in Qt 6, a QString
+    // reports that it can be converted to QVariantList, which would drop it.
+    if (value.userType() == QMetaType::QVariantMap)
       {
       value = QVariant::fromValue(QVariantList() << value.toMap());
       }
-    if (value.canConvert<QVariantList>())
+    if (value.userType() == QMetaType::QVariantList)
       {
       foreach(const QVariant& item, value.toList())
         {
@@ -665,8 +667,8 @@ QString qRestAPI::qVariantMapListToString(const QList<QVariantMap>& list)
 QString qRestAPI::qVariantToString(const QVariant &value, int indent)
 {
   QString output;
-  bool isVariantList = value.canConvert<QVariantList>();
-  bool isVariantMap = value.canConvert<QVariantMap>();
+  bool isVariantList = (value.userType() == QMetaType::QVariantList);
+  bool isVariantMap = (value.userType() == QMetaType::QVariantMap);
   if ((isVariantList || isVariantMap) && indent > 0)
     {
     output += "\n";
